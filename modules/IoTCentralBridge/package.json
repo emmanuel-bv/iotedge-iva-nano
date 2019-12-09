@@ -1,0 +1,8 @@
+{
+    "name": "iotcentralbridge",
+    "version": "0.0.1",
+    "dependencies": {
+        "azure-iot-device": "^1.7.0",
+        "azure-iot-device-mqtt": "^1.7.0"
+    }
+}
