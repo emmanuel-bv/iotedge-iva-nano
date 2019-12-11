@@ -63,8 +63,15 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "${MODULES.IoTCentralBridge}",
-              "createOptions": {}
+              "image": "${MODULES.IoTCentralBridge.arm64v8}",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "9014/tcp": [{"HostPort": "9014"}]
+                  },
+                  "Binds": ["data/misc:/data/misc", "/run/systemd;/run/systemd", "/var/run/docker.sock:/var/run/docker.sock"]
+                }
+              }
             }
           }
         }

@@ -1,0 +1,15 @@
+{
+    "system": {
+        "systemName": "",
+        "systemId": ""
+    },
+    "iotCentral": {
+        "properties": {
+            "manufacturer": "NVIDIA",
+            "model": "NVIDIA Jetson Nano Developer Kit",
+            "totalStorage": "16777216",
+            "storageDirectory": "/data/misc/storage",
+            "gpuProcessor": "128-core NVIDIA Maxwell™"
+        }
+    }
+}
