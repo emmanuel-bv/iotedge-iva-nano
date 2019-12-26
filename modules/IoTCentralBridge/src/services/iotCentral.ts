@@ -23,6 +23,8 @@ import {
 import { healthCheckInterval, HealthState } from './health';
 import { bind, defer, emptyObj } from '../utils';
 
+//todo: could this file be slimmed down with deeepstream config tools in a separate utility?
+
 export interface ISystemProperties {
     cpuModel: string;
     cpuCores: number;
