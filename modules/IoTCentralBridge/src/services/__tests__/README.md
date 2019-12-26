@@ -1,0 +1,4 @@
+# Tests
+
+## Run
+npm t
