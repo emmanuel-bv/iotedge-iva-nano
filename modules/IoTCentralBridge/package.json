@@ -29,6 +29,7 @@
       "@hapi/nes": "^11.1.0",
       "azure-iot-device": "^1.11.2",
       "azure-iot-device-mqtt": "^1.10.3",
+      "download": "^7.1.0",
       "fs-extra": "^7.0.1",
       "lodash.defaults": "^4.2.0",
       "lodash.get": "^4.4.2",
@@ -41,6 +42,7 @@
       "request": "^2.88.0",
       "rimraf": "^2.6.3",
       "spryly": "^1.0.19",
+      "unzipper": "^0.10.5",
       "uuid": "^3.3.2"
     },
     "devDependencies": {

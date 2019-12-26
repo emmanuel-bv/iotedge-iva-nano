@@ -1,5 +1,5 @@
 {
-    "@id": "urn:AzureIoT:NVIDIAJetsonNano8StreamDemo:1",
+    "@id": "urn:AzureIoT:NVIDIAJetsonNano8StreamsCustomVision:1",
     "@type": "CapabilityModel",
     "implements": [],
     "displayName": {
@@ -7,7 +7,7 @@
     },
     "contents": [
         {
-            "@id": "urn:AzureIoT:NVIDIAJetsonNano8StreamDemo:NVIDIANano8StreamDemoModule:1",
+            "@id": "urn:AzureIoT:NVIDIAJetsonNano8StreamsCustomVision:NVIDIANano8StreamsCustomVisionModule:1",
             "@type": [
                 "Relationship",
                 "SemanticType/EdgeModule"
@@ -15,11 +15,11 @@
             "displayName": {
                 "en": "NVIDIA Jetson Nano"
             },
-            "name": "NVIDIANano8StreamDemoModule",
+            "name": "NVIDIANano8StreamsCustomVisionModule",
             "maxMultiplicity": 1,
             "target": [
                 {
-                    "@id": "urn:AzureIoT:NVIDIANano8StreamDemoModule:1",
+                    "@id": "urn:AzureIoT:NVIDIANano8StreamsCustomVisionModule:1",
                     "@type": "CapabilityModel",
                     "implements": [
                         {
@@ -29,7 +29,7 @@
                             },
                             "name": "Settings",
                             "schema": {
-                                "@id": "urn:AzureIoT:NVIDIANano8StreamDemoModule:ISettings:1",
+                                "@id": "urn:AzureIoT:NVIDIANano8StreamsCustomVisionModule:ISettings:1",
                                 "@type": "Interface",
                                 "displayName": {
                                     "en": "Settings"
@@ -38,20 +38,11 @@
                                     {
                                         "@type": "Property",
                                         "displayName": {
-                                            "en": "Primary Detection Class"
+                                            "en": "Demo mode"
                                         },
-                                        "name": "wpPrimaryDetectionClass",
+                                        "name": "wpDemoMode",
                                         "writable": true,
-                                        "schema": "string"
-                                    },
-                                    {
-                                        "@type": "Property",
-                                        "displayName": {
-                                            "en": "Secondary Detection Class"
-                                        },
-                                        "name": "wpSecondaryDetectionClass",
-                                        "writable": true,
-                                        "schema": "string"
+                                        "schema": "boolean"
                                     },
                                     {
                                         "@type": "Property",
@@ -66,14 +57,6 @@
                                                 "en": "Object"
                                             },
                                             "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "active"
-                                                    },
-                                                    "name": "active",
-                                                    "schema": "boolean"
-                                                },
                                                 {
                                                     "@type": "SchemaField",
                                                     "displayName": {
@@ -109,14 +92,6 @@
                                                 {
                                                     "@type": "SchemaField",
                                                     "displayName": {
-                                                        "en": "active"
-                                                    },
-                                                    "name": "active",
-                                                    "schema": "boolean"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
                                                         "en": "cameraId"
                                                     },
                                                     "name": "cameraId",
@@ -146,14 +121,6 @@
                                                 "en": "Object"
                                             },
                                             "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "active"
-                                                    },
-                                                    "name": "active",
-                                                    "schema": "boolean"
-                                                },
                                                 {
                                                     "@type": "SchemaField",
                                                     "displayName": {
@@ -189,14 +156,6 @@
                                                 {
                                                     "@type": "SchemaField",
                                                     "displayName": {
-                                                        "en": "active"
-                                                    },
-                                                    "name": "active",
-                                                    "schema": "boolean"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
                                                         "en": "cameraId"
                                                     },
                                                     "name": "cameraId",
@@ -226,14 +185,6 @@
                                                 "en": "Object"
                                             },
                                             "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "active"
-                                                    },
-                                                    "name": "active",
-                                                    "schema": "boolean"
-                                                },
                                                 {
                                                     "@type": "SchemaField",
                                                     "displayName": {
@@ -269,14 +220,6 @@
                                                 {
                                                     "@type": "SchemaField",
                                                     "displayName": {
-                                                        "en": "active"
-                                                    },
-                                                    "name": "active",
-                                                    "schema": "boolean"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
                                                         "en": "cameraId"
                                                     },
                                                     "name": "cameraId",
@@ -306,14 +249,6 @@
                                                 "en": "Object"
                                             },
                                             "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "active"
-                                                    },
-                                                    "name": "active",
-                                                    "schema": "boolean"
-                                                },
                                                 {
                                                     "@type": "SchemaField",
                                                     "displayName": {
@@ -349,14 +284,6 @@
                                                 {
                                                     "@type": "SchemaField",
                                                     "displayName": {
-                                                        "en": "active"
-                                                    },
-                                                    "name": "active",
-                                                    "schema": "boolean"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
                                                         "en": "cameraId"
                                                     },
                                                     "name": "cameraId",
@@ -368,6 +295,93 @@
                                                         "en": "videoStreamUrl"
                                                     },
                                                     "name": "videoStreamUrl",
+                                                    "schema": "string"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "@type": "Property",
+                                        "displayName": {
+                                            "en": "Objects Detected"
+                                        },
+                                        "name": "wpObjectsDetected",
+                                        "writable": true,
+                                        "schema": {
+                                            "@type": "Object",
+                                            "displayName": {
+                                                "en": "Object"
+                                            },
+                                            "fields": [
+                                                {
+                                                    "@type": "SchemaField",
+                                                    "displayName": {
+                                                        "en": "Primary Object Detected"
+                                                    },
+                                                    "name": "primaryObjectDetected",
+                                                    "schema": "string"
+                                                },
+                                                {
+                                                    "@type": "SchemaField",
+                                                    "displayName": {
+                                                        "en": "Secondary Object Detected"
+                                                    },
+                                                    "name": "secondaryObjectDetected",
+                                                    "schema": "string"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "@type": "Property",
+                                        "displayName": {
+                                            "en": "AI Model"
+                                        },
+                                        "name": "wpAIModel",
+                                        "writable": true,
+                                        "schema": {
+                                            "@type": "Object",
+                                            "displayName": {
+                                                "en": "Object"
+                                            },
+                                            "fields": [
+                                                {
+                                                    "@type": "SchemaField",
+                                                    "displayName": {
+                                                        "en": "AI Model Provider"
+                                                    },
+                                                    "name": "aiModelProvider",
+                                                    "schema": {
+                                                        "@type": "Enum",
+                                                        "valueSchema": "integer",
+                                                        "enumValues": [
+                                                            {
+                                                                "name": "dsResnet10",
+                                                                "displayName": "DeepStream ResNet10",
+                                                                "enumValue": 1
+                                                            },
+                                                            {
+                                                                "name": "customVision",
+                                                                "displayName": "Custom Vision",
+                                                                "enumValue": 2
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "@type": "SchemaField",
+                                                    "displayName": {
+                                                        "en": "Number of Objects Trained For"
+                                                    },
+                                                    "name": "aiModelNbClasses",
+                                                    "schema": "integer"
+                                                },
+                                                {
+                                                    "@type": "SchemaField",
+                                                    "displayName": {
+                                                        "en": "AI Model URI (ONNX format, .zip)"
+                                                    },
+                                                    "name": "aiModelZip",
                                                     "schema": "string"
                                                 }
                                             ]
@@ -477,7 +491,7 @@
                                 "en": "Module Information"
                             },
                             "schema": {
-                                "@id": "urn:AzureIoT:NVIDIANano8StreamDemoModule:IModuleInformation:1",
+                                "@id": "urn:AzureIoT:NVIDIANano8StreamONNXModule:IModuleInformation:1",
                                 "@type": "Interface",
                                 "displayName": {
                                     "en": "Module Information"
