@@ -16,7 +16,7 @@ import { bind } from '../utils';
 
 const defaultDockerApiVersion: string = '1.37';
 const defaultDockerSocket: string = '/var/run/docker.sock';
-const defaultDeepStreamModuleName: string = 'deepstream';
+const defaultDeepStreamModuleName: string = 'NVIDIADeepStreamSDK'; //todo: make this an env variable : process.env.DEEPSTREAM_MODULE_NAME || 'NVIDIADeepStreamSDK'
 
 @service('device')
 export class DeviceService {
