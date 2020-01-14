@@ -460,7 +460,7 @@ export class IoTCentralService {
         }
     }
 
-    public async getSystemProperties(): Promise<ISystemProperties> {
+    public async getSystemProperties()c: Promise<ISystemProperties> {
         const cpus = osCpus();
         const cpuUsageSamples = osLoadAvg();
 

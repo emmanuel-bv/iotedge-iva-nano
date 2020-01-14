@@ -1,5 +1,5 @@
 {
-    "@id": "urn:AzureIoT:NVIDIAJetsonNano8StreamsCustomVision:1",
+    "@id": "urn:AzureIoT:NVIDIAJetsonNano:1",
     "@type": "CapabilityModel",
     "implements": [],
     "displayName": {
@@ -7,7 +7,7 @@
     },
     "contents": [
         {
-            "@id": "urn:AzureIoT:NVIDIAJetsonNano8StreamsCustomVision:NVIDIANano8StreamsCustomVisionModule:1",
+            "@id": "urn:AzureIoT:NVIDIAJetsonNano:IoTCentralBridge:1",
             "@type": [
                 "Relationship",
                 "SemanticType/EdgeModule"
@@ -15,11 +15,11 @@
             "displayName": {
                 "en": "NVIDIA Jetson Nano"
             },
-            "name": "NVIDIANano8StreamsCustomVisionModule",
+            "name": "IoTCentralBridge",
             "maxMultiplicity": 1,
             "target": [
                 {
-                    "@id": "urn:AzureIoT:NVIDIANano8StreamsCustomVisionModule:1",
+                    "@id": "urn:AzureIoT:IoTCentralBridge:1",
                     "@type": "CapabilityModel",
                     "implements": [
                         {
@@ -29,7 +29,7 @@
                             },
                             "name": "Settings",
                             "schema": {
-                                "@id": "urn:AzureIoT:NVIDIANano8StreamsCustomVisionModule:ISettings:1",
+                                "@id": "urn:AzureIoT:IoTCentralBridge:ISettings:1",
                                 "@type": "Interface",
                                 "displayName": {
                                     "en": "Settings"
@@ -38,11 +38,71 @@
                                     {
                                         "@type": "Property",
                                         "displayName": {
-                                            "en": "Demo mode"
+                                            "en": "Demo Mode"
                                         },
                                         "name": "wpDemoMode",
                                         "writable": true,
                                         "schema": "boolean"
+                                    },
+                                    {
+                                        "@type": "Property",
+                                        "displayName": {
+                                            "en": "AI Model Type"
+                                        },
+                                        "name": "wpAIModelProvider",
+                                        "writable": true,
+                                        "schema": {
+                                            "@type": "Enum",
+                                            "displayName": {
+                                                "en": "Enum"
+                                            },
+                                            "valueSchema": "string",
+                                            "enumValues": [
+                                                {
+                                                    "@type": "EnumValue",
+                                                    "displayName": {
+                                                        "en": "DeepStream ResNet10"
+                                                    },
+                                                    "enumValue": "DeepStream",
+                                                    "name": "DeepStream"
+                                                },
+                                                {
+                                                    "@type": "EnumValue",
+                                                    "displayName": {
+                                                        "en": "Custom Vision"
+                                                    },
+                                                    "enumValue": "CustomVision",
+                                                    "name": "CustomVision"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "@type": "Property",
+                                        "displayName": {
+                                            "en": "Custom Vision Model Url"
+                                        },
+                                        "name": "wpCustomVisionModelUrl",
+                                        "writable": true,
+                                        "schema": "string"
+                                    },
+                                    {
+                                        "@type": "Property",
+                                        "displayName": {
+                                            "en": "Primary Detection Class"
+                                        },
+                                        "name": "wpPrimaryDetectionClass",
+                                        "writable": true,
+                                        "schema": "string"
+                                    },
+                                    {
+                                        "@type": "Property",
+                                        "displayName": {
+                                            "en": "Secondary Detection Class"
+                                        },
+                                        "name": "wpSecondaryDetectionClass",
+                                        "writable": true,
+                                        "schema": "string"
                                     },
                                     {
                                         "@type": "Property",
@@ -299,93 +359,6 @@
                                                 }
                                             ]
                                         }
-                                    },
-                                    {
-                                        "@type": "Property",
-                                        "displayName": {
-                                            "en": "Objects Detected"
-                                        },
-                                        "name": "wpObjectsDetected",
-                                        "writable": true,
-                                        "schema": {
-                                            "@type": "Object",
-                                            "displayName": {
-                                                "en": "Object"
-                                            },
-                                            "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "Primary Object Detected"
-                                                    },
-                                                    "name": "primaryObjectDetected",
-                                                    "schema": "string"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "Secondary Object Detected"
-                                                    },
-                                                    "name": "secondaryObjectDetected",
-                                                    "schema": "string"
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        "@type": "Property",
-                                        "displayName": {
-                                            "en": "AI Model"
-                                        },
-                                        "name": "wpAIModel",
-                                        "writable": true,
-                                        "schema": {
-                                            "@type": "Object",
-                                            "displayName": {
-                                                "en": "Object"
-                                            },
-                                            "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "AI Model Provider"
-                                                    },
-                                                    "name": "aiModelProvider",
-                                                    "schema": {
-                                                        "@type": "Enum",
-                                                        "valueSchema": "integer",
-                                                        "enumValues": [
-                                                            {
-                                                                "name": "dsResnet10",
-                                                                "displayName": "DeepStream ResNet10",
-                                                                "enumValue": 1
-                                                            },
-                                                            {
-                                                                "name": "customVision",
-                                                                "displayName": "Custom Vision",
-                                                                "enumValue": 2
-                                                            }
-                                                        ]
-                                                    }
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "Number of Objects Trained For"
-                                                    },
-                                                    "name": "aiModelNbClasses",
-                                                    "schema": "integer"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "AI Model URI (ONNX format, .zip)"
-                                                    },
-                                                    "name": "aiModelZip",
-                                                    "schema": "string"
-                                                }
-                                            ]
-                                        }
                                     }
                                 ]
                             }
@@ -491,7 +464,7 @@
                                 "en": "Module Information"
                             },
                             "schema": {
-                                "@id": "urn:AzureIoT:NVIDIANano8StreamONNXModule:IModuleInformation:1",
+                                "@id": "urn:AzureIoT:IoTCentralBridge:IModuleInformation:1",
                                 "@type": "Interface",
                                 "displayName": {
                                     "en": "Module Information"
@@ -699,9 +672,36 @@
                                             "SemanticType/Event"
                                         ],
                                         "displayName": {
+                                            "en": "Change Video Model"
+                                        },
+                                        "name": "evChangeVideoModel",
+                                        "schema": "string"
+                                    },
+                                    {
+                                        "@type": [
+                                            "Telemetry",
+                                            "SemanticType/Event"
+                                        ],
+                                        "displayName": {
                                             "en": "Device Restart"
                                         },
                                         "name": "evDeviceRestart",
+                                        "schema": "string"
+                                    },
+                                    {
+                                        "@type": "Property",
+                                        "displayName": {
+                                            "en": "RTSP Video Url"
+                                        },
+                                        "name": "rpRtspVideoUrl",
+                                        "schema": "string"
+                                    },
+                                    {
+                                        "@type": "Property",
+                                        "displayName": {
+                                            "en": "Video Tagging Client Url"
+                                        },
+                                        "name": "rpVideoTaggingClientUrl",
                                         "schema": "string"
                                     },
                                     {
