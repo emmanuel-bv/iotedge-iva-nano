@@ -53,7 +53,7 @@ Deesptream is a SDK based on GStreamer. It is very modular with its concepts of 
 
 You can learn more about its architecture in [NVIDIA's official documentation](https://docs.nvidia.com/metropolis/deepstream/dev-guide/index.html#page/DeepStream_Development_Guide%2Fdeepstream_app_architecture.html) (sneak peak below).
 
-![NVIDIA Deepstream Application Architecture](https://docs.nvidia.com/metropolis/deepstream/dev-guide/DeepStream_Development_Guide/images/image4.png).
+![NVIDIA Deepstream Application Architecture](./assets/DeepStreamArchitecture.png).
 
 To better understand how NVIDIA DeepStream works, let's have a look at its configuration file.
 
@@ -82,7 +82,7 @@ Observe in particular:
 IoT Edge connects to IoT Central with the regular Module SDK. Telemetry, Properties and Commands that the IoT Edge Central bridge module sends follow a PnP format, enforced in the Cloud by IoT Central. IoT Central enforces them against a Device Capability Model, which is a file that defines what this IoT Edge device is capable of doing.
 
 - Click on `Devices` in the left nav of the IoT Central application
-- Observe the templates in the second column: they define all the devices that this IoT Central application understands. All the Jetson Nano devices of this workshop are using a version of the `NVIDIA Jetson Nano (Airlift)` device template. In the case of IoT Edge, an IoT Edge deployment manifest is attached to a DCM version to create a device template. If you want to see the details on how a Device Capability Model look like, you can look at (this file in this repo)[https://github.com/ebertrams/iotedge-iva-nano/blob/IoTCentralBridge-CV/settings/NVIDIAJetsonNanoDemo8StreamsCustomVisionDcm.json]. 
+- Observe the templates in the second column: they define all the devices that this IoT Central application understands. All the Jetson Nano devices of this workshop are using a version of the `NVIDIA Jetson Nano (Airlift)` device template. In the case of IoT Edge, an IoT Edge deployment manifest is attached to a DCM version to create a device template. If you want to see the details on how a Device Capability Model look like, you can look at (this file in this repo)[https://github.com/ebertrams/iotedge-iva-nano/blob/IoTCentralBridge-CV/settings/NVIDIAJetsonNanoDcm.json]. 
 
 ## Operating the solution
 
@@ -93,10 +93,10 @@ Now that we understand how the application has been built, let's operate it with
 Before switching the application to a different camera, let's just verify that the camera is functional. With VLC: 
 
 - Go to `Media` > `Open Network Stream`
-- Paste the following `RTSP Video URL`:  //TODO
-- Click `Play` and verify that an indoor camera is properly displaying
+- Paste the following `RTSP Video URL`:  rtsp://cam-indoor-01.westus.azurecontainer.io:8554/live.sdp
+- Click `Play` and verify that an indoor camera is properly displaying. If this video feed does not work, please move on to the next section.
 
-You can do the same with the second indoor camera: //TODO
+You can do the same with the second indoor camera: rtsp://cam-indoor-01.westus.azurecontainer.io:8554/live.sdp
 
 Now, let's update the solution to use these indoor cameras. In IoT Central:
 
@@ -104,10 +104,10 @@ Now, let's update the solution to use these indoor cameras. In IoT Central:
 - Unselect the `Demo Mode`, which uses 8 hardcoded video files as input of car traffic
 - Update the `Video Stream 1` property:
     - In the `cameraId`, name your camera, for instance `indoor Camera 1`
-    - In the `videoStreamUrl`, enter the RTSP stream of this camera: //TODO
+    - In the `videoStreamUrl`, enter the RTSP stream of this camera: rtsp://cam-indoor-01.westus.azurecontainer.io:8554/live.sdp
 - Update the `Video Stream 2` property:
     - In the `cameraId`, name your camera, for instance `indoor Camera 2`
-    - In the `videoStreamUrl`, enter the RTSP stream of this camera: //TODO
+    - In the `videoStreamUrl`, enter the RTSP stream of this camera: rtsp://cam-indoor-02.westus.azurecontainer.io:8554/live.sdp
 - Keep the default AI model of DeepStream by keeping the value `DeepStream ResNet 10` as the `AI model type`.
 - Keep the default `Primary Detection Class` as `person`
 - Hit `Save`
@@ -117,8 +117,6 @@ This sends a command to the device to update its DeepStream configuration file w
 Within a minute, DeepStream should restart. You can observe its status in IoT Central via the `Modules` tab. Once `deepstream` module is back to `Running`, copy again the `RTSP Video Url` field from the `Device` tab and give it to VLC (`Media` > `Open Network Stream` > paste the `RTSP Video URL` > `Play`).
 
 You should now detect people from 2 indoor cameras. The count of `Person` in the `dashboard` tab in IoT Central should go up. We've just remotely updated the configuration of this intelligent video analytics solution!
-
-//TODO: Add image
 
 ## Use an AI model to detect custom visual anomalies
 
@@ -140,7 +138,7 @@ From the Camera Tagging Module:
 
 - Connect to one of the camera of the manufacturing line:
    - 'Change camera' (you may have to scroll down to see the button)
-   - Add a new camera with the following RTSP value: //TODO
+   - Add a new camera with the following RTSP value: rtsp://cam-cans-01.westus.azurecontainer.io:8554/live.sdp
 - Capture a few images of cans that are up and cans that are down
 - Once a few images have been capture, go to upload and enter your Custom Vision settings
 - Finally, go to the image gallery, select the ones that you want to upload and upload them to Custom Vision
