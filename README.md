@@ -86,6 +86,8 @@ IoT Edge connects to IoT Central with the regular Module SDK. Telemetry, Propert
 
 Now that we understand how the application has been built, let's operate it with IoT Central. To demonstrate how to remotely manage this solution, we'll send a command to the device to change its input cameras.
 
+![IoT Central](./assets/IoTCentral.png "IoT Central UI to remotely manage NVIDIA Jetson devices")
+
 ### Changing input cameras
 
 Before switching the application to a different camera, let's just verify that the camera is functional. With VLC: 
@@ -166,6 +168,9 @@ Finally, we'll deploy this custom vision model to the Jetson Nano using IoT Cent
 After a few moments, the `deepstream` module should restart. Once it is in `Running` state again, look at the output RTSP stream via VLC (`Media` > `Open Network Stream` > paste the `RTSP Video URL` that you got from the IoT Central's `Device` tab > `Play`).
 
 We are now visualizing the processing of 3 real time (e.g. 30fps 1080p) video feeds with a custom vision AI models that we built in minutes to detect visual anomalies!
+
+![Custom Vision](./assets/sodaCans.png "3 soda cans manufacturing lines are bieing monitored with a custom AI model built with Custom Vision")
+
 
 Thank you for attending this workshop! There are other content that you can try with your Jetson Nano at [http://aka.ms/jetson-on-azure](http://aka.ms/jetson-on-azure)!
 
