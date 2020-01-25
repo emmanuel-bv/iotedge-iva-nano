@@ -15,7 +15,30 @@ We'll operate this solution with an aesthetic UI provided by [IoT Central](https
 - **Hardware**: You need a [NVIDIA Jetson Nano device](https://developer.nvidia.com/embedded/buy/jetson-nano-devkit) with a [5V-4A barrel jack power supply like this one](https://www.adafruit.com/product/1466), which are provided in this workshop.
 - **A laptop**: You need a laptop to connect to your Jetson Nano device and see its results with a browser and an ssh client.
 - **VLC**: To visualize the output of the Jetson Nano without HDMI screen (there is only one per table), we'll use VLC from your laptop to view a RTSP video stream of the processed videos. [Install VLC](https://www.videolan.org/vlc/index.html) if you dont have it yet.
-- **Access to IoT Central**: Jetson Nano devices have been prepared to connect to the following IoT Central application: [https://deepstream-on-iot-edge.azureiotcentral.com/](https://deepstream-on-iot-edge.azureiotcentral.com/). Please ask for help if you cannot login to this application with your Microsoft account.
+- **Have an Azure subscription**: Jetson Nano devices have been prepared to connect to the following IoT Central application: [https://deepstream-on-iot-edge.azureiotcentral.com/](https://deepstream-on-iot-edge.azureiotcentral.com/). Please ask for help if you cannot login to this application with your Microsoft account.
+
+## Setup a new IoT Central app
+Let's create a new IoT Central app to which we will connect our Jetson Nano later on.
+
+### Create a new IoT Central app
+We'll start from a pre-built template of IoT Central, which already includes an application to see and command a video analytics solution running on the NVIDIA Jetson Nano.
+- From your browser, go to: https://apps.azureiotcentral.com/build/new/2b52603e-2eed-4e80-8b4b-b92b57032b17
+- Give a name and URL to your application
+- Select your Azure subscription (you can opt-in for a 7 day free trial)
+- Select your location
+- Click on `Create`
+
+### Create an IoT Edge device from your IoT Central app
+We'll create a new IoT Edge device in your IoT Central application that will enable to the NVIDIA Jetson Nano to connect to IoT Central.
+
+- Go to the `Devices` tab
+- Select the `NVIDIA Jetson Nano (Airlift) v3` device template
+- Click on `New`
+- Give a name to your device by editing the `Device ID` and the `Device name` fields (let's use the same name for both of these fields in this workshop)
+- Click on `Create`
+- Click on your new device
+- Click on the `Connect` button in the top right corner
+- Copy your `ID Scope` value, `Device ID` value and `Primary key` value and save them for later.
 
 ## Setting up your device
 
@@ -29,19 +52,19 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
     sudo mkdir /data
     ```
 
-4. Make the folder accessible from a normal user account:
-
-    ```bash
-    sudo chmod -R 777 /data
-    ```
-
-5. Download and extra setup files in the `data` directory:
+4. Download and extra setup files in the `data` directory:
 
     ```bash
     cd /data
     wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21587629&authkey=AI-nRpWZW8kOnrU"
     tar -xjvf setup.tar.bz2
     ```
+5. Make the folder accessible from a normal user account:
+
+    ```bash
+    sudo chmod -R 777 /data
+    ```
+
 6. Install IoT Edge (instructions copied [from here](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) for convenience):
 
     ```bash
@@ -52,7 +75,45 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
     sudo apt-get update
     sudo apt-get install iotedge
     ```
+7. Connect your device to your IoT Central application by editing IoT Edge configuration file:
+
+    * Use your favorite text editor to edit IoT Edge configuration file:
     
+    ```bash
+    sudo nano /etc/iotedge/config.yaml
+    ```
+
+    * Comment out the "Manual provisioning configuration" section so it looks like this:
+
+    ```bash
+    # Manual provisioning configuration
+    #provisioning:
+    #  source: "manual"
+    #  device_connection_string: ""      
+    ```
+
+    * Uncomment the "DPS symmetric keyi provisioning configuration" and add your IoT Central app's scope id, registration_id which is your device Id and its primary symmetric key:
+      ```
+      # DPS symmetric key provisioning configuration
+      provisioning:
+        source: "dps"
+        global_endpoint: "https://global.azure-devices-provisioning.net"
+        scope_id: "<ID Scope>"
+        attestation:
+          method: "symmetric_key"
+          registration_id: "<Device ID>"
+          symmetric_key: "<Primary Key>"
+      ```
+    * Save and exit your editor (Ctrl+O, Ctrl+X)
+
+  * Now Restart the Azure IoT Edge runtime with the following command:
+
+    ```bash
+    sudo systemctl restart iotedge
+    ```
+
+  * After a few moments the Edge runtime should restart and use the new DPS provisioning method you configured. When that happens successfully you will see a new device in your Azure IoT app under the Devices section.
+  * Follow the instructions in the [Azure IoT Central Documentation](https://docs.microsoft.com/en-us/azure/iot-central/) to add a dashboard view to your template to visualize the telemetry.
     
 
 ## Running the solution
@@ -77,9 +138,9 @@ Let's see it in action!
 6. Copy the `RTSP Video URL` from the `Device` tab
 7. Open VLC and go to `Media` > `Open Network Stream` and paste the `RTSP Video URL` copied above as the network URL and click `Play`
 
-At this point, you should see 8 video streams being processed to detect cars and people with a Resnet 10 AI model.
+At this point, you should see 4 video streams being processed to detect cars and people with a Resnet 10 AI model.
 
-![8 video streams processed real-time](./assets/8VideosProcessed.png "8 video streams processed in real-time by a Jetson Nano with Deepstream and IoT Edge")
+![4 video streams processed real-time](./assets/4VideosProcessedRTSP.png "8 video streams processed in real-time by a Jetson Nano with Deepstream and IoT Edge")
 
 ### Understanding NVIDIA DeepStream
 
