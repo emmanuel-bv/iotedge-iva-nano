@@ -1,6 +1,6 @@
 # Visual Anomaly Detection over multiple cameras with NVIDIA Jetson Nano devices workshop
 
-In this workshop, you'll discover how to build a solution that can process up to 8 real-time video streams with an AI model on a $100 device, how to remotely operate your device, and demonstrate how you can deploy custom AI models to it. 
+In this workshop, you'll discover how to build a solution that can process up to 8 real-time video streams with an AI model on a $100 device, how to remotely operate your device, and demonstrate how you can deploy custom AI models to it.
 
 With this solution, you can transform cameras into sensors to know when there is an available parking spot, a missing product on a retail store shelf, an anomaly on a solar panel, a worker approaching a hazardous zone., etc.
 
@@ -17,7 +17,31 @@ We'll operate this solution with an aesthetic UI provided by [IoT Central](https
 - **VLC**: To visualize the output of the Jetson Nano without HDMI screen (there is only one per table), we'll use VLC from your laptop to view a RTSP video stream of the processed videos. [Install VLC](https://www.videolan.org/vlc/index.html) if you dont have it yet.
 - **Access to IoT Central**: Jetson Nano devices have been prepared to connect to the following IoT Central application: [https://deepstream-on-iot-edge.azureiotcentral.com/](https://deepstream-on-iot-edge.azureiotcentral.com/). Please ask for help if you cannot login to this application with your Microsoft account.
 
-Note: Your NVIDIA Jetson Nano has already been flashed with the latest image (Jetpack 4.3). It is based on Ubuntu 18.04 and already includes NVIDIA drivers, CUDA, and Nvidia-Docker. For this workshop, we've also added several other files to speed things up.
+## Setting up your device
+
+We'll start from a blank Jetson installation (Jetpack v4.3) and copy a few files locally that are needed for the application such as video files to simulate RTSP cameras and deepstream configuration files.
+
+1. Follow the [instructions for creating a NVIDIA Jetson Nano base image](https://developer.nvidia.com/embedded/jetson-nano-developer-kit)
+2. Optionally [create a swapfile on the Jetson Nano](https://github.com/JetsonHacksNano/installSwapfile) to gain a bit more memory.
+3. On your Jetson Nano create a folder name `data` at the root:
+
+    ```bash
+    mkdir /data
+    ```
+
+4. Make the folder accessible from a normal user account:
+
+    ```bash
+    sudo chmod -R 777 /data
+    ```
+
+5. Download and extra setup files in the `data` directory:
+
+    ```bash
+    cd /data
+    wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21587629&authkey=AI-nRpWZW8kOnrU"
+    tar -xjvf setup.tar.bz2
+    ```
 
 ## Running the solution
 
@@ -170,7 +194,6 @@ After a few moments, the `deepstream` module should restart. Once it is in `Runn
 We are now visualizing the processing of 3 real time (e.g. 30fps 1080p) video feeds with a custom vision AI models that we built in minutes to detect visual anomalies!
 
 ![Custom Vision](./assets/sodaCans.png "3 soda cans manufacturing lines are bieing monitored with a custom AI model built with Custom Vision")
-
 
 Thank you for attending this workshop! There are other content that you can try with your Jetson Nano at [http://aka.ms/jetson-on-azure](http://aka.ms/jetson-on-azure)!
 
