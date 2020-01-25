@@ -19,14 +19,14 @@ We'll operate this solution with an aesthetic UI provided by [IoT Central](https
 
 ## Setting up your device
 
-We'll start from a blank Jetson installation (Jetpack v4.3) and copy a few files locally that are needed for the application such as video files to simulate RTSP cameras and deepstream configuration files.
+We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files locally that are needed for the application such as video files to simulate RTSP cameras and deepstream configuration files, and install IoT Edge.
 
 1. Follow the [instructions for creating a NVIDIA Jetson Nano base image](https://developer.nvidia.com/embedded/jetson-nano-developer-kit)
 2. Optionally [create a swapfile on the Jetson Nano](https://github.com/JetsonHacksNano/installSwapfile) to gain a bit more memory.
 3. On your Jetson Nano create a folder name `data` at the root:
 
     ```bash
-    mkdir /data
+    sudo mkdir /data
     ```
 
 4. Make the folder accessible from a normal user account:
@@ -42,6 +42,18 @@ We'll start from a blank Jetson installation (Jetpack v4.3) and copy a few files
     wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21587629&authkey=AI-nRpWZW8kOnrU"
     tar -xjvf setup.tar.bz2
     ```
+6. Install IoT Edge (instructions copied [from here](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) for convenience):
+
+    ```bash
+    curl https://packages.microsoft.com/config/ubuntu/18.04/multiarch/prod.list > ./microsoft-prod.list
+    sudo cp ./microsoft-prod.list /etc/apt/sources.list.d/
+    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+    sudo cp ./microsoft.gpg /etc/apt/trusted.gpg.d/
+    sudo apt-get update
+    sudo apt-get install iotedge
+    ```
+    
+    
 
 ## Running the solution
 
