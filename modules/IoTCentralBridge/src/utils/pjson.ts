@@ -6,10 +6,7 @@ export function pjson(): any {
 
     try {
         const packagePath = resolve(__dirname, '..', '..', 'package.json');
-        const contents = fse.readFileSync(packagePath);
-        if (contents) {
-            result = JSON.parse(contents);
-        }
+        result = fse.readJSONSync(packagePath);
     }
     catch (ex) {
         // eat exception

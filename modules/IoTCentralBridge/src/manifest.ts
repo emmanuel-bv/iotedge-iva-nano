@@ -10,7 +10,7 @@ export function manifest(config?: any): ComposeManifest {
             port: PORT,
             app: {
                 rootDirectory: pathResolve(__dirname, '..'),
-                dataMiscRootDirectory: process.env.DATAMISC_ROOT || '/data/misc',
+                storageRootDirectory: process.env.DATAMISC_ROOT || '/data/misc/storage',
                 slogan: 'NVIDIA Jetson Nano local service'
             }
         },
@@ -19,9 +19,6 @@ export function manifest(config?: any): ComposeManifest {
         ],
         plugins: [
             ...[
-                {
-                    plugin: '@hapi/inert'
-                },
                 {
                     plugin: '@hapi/good',
                     options: generateLoggingOptions(config)

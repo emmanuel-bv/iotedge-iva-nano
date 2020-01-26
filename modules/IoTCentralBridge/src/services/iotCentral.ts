@@ -1,6 +1,7 @@
 import { service, inject } from 'spryly';
 import { Server } from '@hapi/hapi';
 import * as _get from 'lodash.get';
+import * as ip from 'ip';
 import {
     arch as osArch,
     platform as osPlatform,
@@ -10,21 +11,18 @@ import {
     freemem as osFreeMem,
     loadavg as osLoadAvg
 } from 'os';
-import { promisify } from 'util';
-import { exec } from 'child_process';
 import { LoggingService } from './logging';
 import { ConfigService } from './config';
 import { StateService } from './state';
 import { Mqtt } from 'azure-iot-device-mqtt';
 import {
     ModuleClient,
-    Message
+    Message,
+    DeviceMethodRequest,
+    DeviceMethodResponse
 } from 'azure-iot-device';
 import { healthCheckInterval, HealthState } from './health';
 import { bind, defer, emptyObj } from '../utils';
-import { downloadModel, unzipModel } from '../utils/ModelUtility';
-
-//todo: could this file be slimmed down with deeepstream config tools in a separate utility?
 
 export interface ISystemProperties {
     cpuModel: string;
@@ -52,15 +50,12 @@ interface IVideoStreamInput {
     videoStreamUrl: string;
 }
 
-export interface IObjectDetectionSettings {
-    primaryObjectDetected: string;
-    secondaryObjectDetected: string;
-}
-
-export interface IAiModelSettings {
-    aiModelProvider: number;
-    aiModelNbClasses: number;
-    aiModelZip: string;
+interface IDetectionSettings {
+    wpDemoMode: boolean;
+    wpAIModelProvider: string;
+    wpCustomVisionModelUrl: string;
+    wpPrimaryDetectionClass: string;
+    wpSecondaryDetectionClass: string;
 }
 
 interface IVideoStreamInputSettings {
@@ -82,6 +77,11 @@ export enum ModuleState {
 export enum PipelineState {
     Inactive = 'inactive',
     Active = 'active'
+}
+
+export enum AIModelProvider {
+    DeepStream = 'DeepStream',
+    CustomVision = 'CustomVision'
 }
 
 export enum RestartDeviceCommandParams {
@@ -106,20 +106,21 @@ export const ModuleInfoFieldIds = {
     Event: {
         VideoStreamProcessingStarted: 'evVideoStreamProcessingStarted',
         VideoStreamProcessingStopped: 'evVideoStreamProcessingStopped',
+        ChangeVideoModel: 'evChangeVideoModel',
         DeviceRestart: 'evDeviceRestart'
     },
     Setting: {
         DemoMode: 'wpDemoMode',
+        AIModelProvider: 'wpAIModelProvider',
+        CustomVisionModelUrl: 'wpCustomVisionModelUrl',
+        PrimaryDetectionClass: 'wpPrimaryDetectionClass',
+        SecondaryDetectionClass: 'wpSecondaryDetectionClass',
         VideoStreamInput1: 'wpVideoStreamInput1',
-        VideoStreamInput2: 'wpVideoStreamInput2',
-        VideoStreamInput3: 'wpVideoStreamInput3',
-        VideoStreamInput4: 'wpVideoStreamInput4',
-        VideoStreamInput5: 'wpVideoStreamInput5',
-        VideoStreamInput6: 'wpVideoStreamInput6',
-        VideoStreamInput7: 'wpVideoStreamInput7',
-        VideoStreamInput8: 'wpVideoStreamInput8',
-        ObjectsDetected: 'wpObjectsDetected',
-        AiModel: 'wpAIModel'
+        VideoStreamInput2: 'wpVideoStreamInput2'
+    },
+    Property: {
+        RtspVideoUrl: 'rpRtspVideoUrl',
+        VideoTaggingClientUrl: 'rpVideoTaggingClientUrl'
     },
     Command: {
         RestartDeepStream: 'cmRestartDeepStream',
@@ -127,42 +128,7 @@ export const ModuleInfoFieldIds = {
     }
 };
 
-const DSConfigInputMap = {
-    wpVideoStreamInput1: 'SOURCE0',
-    wpVideoStreamInput2: 'SOURCE1',
-    wpVideoStreamInput3: 'SOURCE2',
-    wpVideoStreamInput4: 'SOURCE3',
-    wpVideoStreamInput5: 'SOURCE4',
-    wpVideoStreamInput6: 'SOURCE5',
-    wpVideoStreamInput7: 'SOURCE6',
-    wpVideoStreamInput8: 'SOURCE7'
-};
-
-const MsgConvConfigMap = {
-    wpVideoStreamInput1: 'SENSOR0',
-    wpVideoStreamInput2: 'SENSOR1',
-    wpVideoStreamInput3: 'SENSOR2',
-    wpVideoStreamInput4: 'SENSOR3',
-    wpVideoStreamInput5: 'SENSOR4',
-    wpVideoStreamInput6: 'SENSOR5',
-    wpVideoStreamInput7: 'SENSOR6',
-    wpVideoStreamInput8: 'SENSOR7'
-};
-
-const InferConfigMap = {
-    aiModelNbClasses: 'NB_CLASSES',
-    aiModelURI: 'MODEL_URI',
-    aiLabelsURI: 'LABELS_URI',
-};
-
-const RowMap = ['1', '1', '1', '1', '1', '2', '2', '2', '2'];
-const ColumnMap = ['1', '1', '2', '4', '4', '4', '4', '4', '4'];
-const BatchSizeMap = ['1', '1', '2', '8', '8', '8', '8', '8', '8'];
-const DisplayWidthMap = ['1280', '1280', '2560', '5120', '5120', '5120', '5120', '5120', '5120'];
-const DisplayHeightMap = ['720', '720', '720', '720', '720', '1440', '1440', '1440', '1440'];
-
 const defaultInferenceThrottle: number = 500;
-// const defaultLowMemoryThreshold: number = 150000;
 
 @service('iotCentral')
 export class IoTCentralService {
@@ -190,11 +156,14 @@ export class IoTCentralService {
     private iotcTelemetryThrottleTimer: number = Date.now();
     private inferenceThrottle: number = defaultInferenceThrottle;
     private inferenceRateCount: number = 0;
-    // private lowMemoryThreshold: number = defaultLowMemoryThreshold;
-
-    private demoMode: boolean;
-
-    private videoStreamInputSettings: IVideoStreamInputSettings = {
+    private detectionSettingsInternal: IDetectionSettings = {
+        wpDemoMode: true,
+        wpAIModelProvider: 'CustomVision',
+        wpCustomVisionModelUrl: '',
+        wpPrimaryDetectionClass: 'person',
+        wpSecondaryDetectionClass: 'car'
+    };
+    private videoStreamInputSettingsInternal: IVideoStreamInputSettings = {
         wpVideoStreamInput1: {
             cameraId: '',
             videoStreamUrl: ''
@@ -228,17 +197,8 @@ export class IoTCentralService {
             videoStreamUrl: ''
         }
     };
+    private moduleIpAddress: string = '127.0.0.1';
 
-    private objectDetectionSettings: IObjectDetectionSettings = {
-        primaryObjectDetected: '',
-        secondaryObjectDetected: ''
-    };
-
-    private aiModelSettings: IAiModelSettings = {
-        aiModelProvider: 1,
-        aiModelNbClasses: 10,
-        aiModelZip: ''
-    }
     public get measurementsSent() {
         return this.measurementsSentInternal;
     }
@@ -251,6 +211,14 @@ export class IoTCentralService {
         return this.iotcModuleIdInternal;
     }
 
+    public get detectionSettings() {
+        return this.detectionSettingsInternal;
+    }
+
+    public get videoStreamInputSettings() {
+        return this.videoStreamInputSettingsInternal;
+    }
+
     public async init(): Promise<void> {
         this.logger.log(['IoTCentral', 'info'], 'initialize');
 
@@ -261,7 +229,7 @@ export class IoTCentralService {
         this.iotcModuleIdInternal = this.config.get('IOTEDGE_MODULEID') || '';
 
         this.inferenceThrottle = this.config.get('inferenceThrottle') || defaultInferenceThrottle;
-        // this.lowMemoryThreshold = this.config.get('lowMemoryThreshold') || defaultLowMemoryThreshold;
+        this.moduleIpAddress = ip.address() || '127.0.0.1';
     }
 
     public async getHealth(): Promise<number> {
@@ -278,9 +246,11 @@ export class IoTCentralService {
 
             await this.sendMeasurement({ [ModuleInfoFieldIds.Telemetry.FreeMemory]: freeMemory });
 
-            // if (freeMemory < this.lowMemoryThreshold) {
-            //     forget(this.server.methods.device.restartDockerImage);
-            // }
+            // TODO:
+            // Find the right threshold for this metric
+            if (freeMemory === 0) {
+                healthState = HealthState.Critical;
+            }
         }
         catch (ex) {
             this.logger.log(['IoTCentralService', 'error'], `Error calling systemProperties: ${ex.message}`);
@@ -363,10 +333,6 @@ export class IoTCentralService {
 
                 this.iotcDeviceTwin = await this.iotcClient.getTwin();
 
-                await this.sendMeasurement({
-                    [ModuleInfoFieldIds.State.PipelineState]: PipelineState.Inactive
-                });
-
                 this.iotcDeviceTwin.on('properties.desired', this.onHandleModuleProperties);
 
                 this.iotcClientConnected = true;
@@ -379,7 +345,9 @@ export class IoTCentralService {
                     [IoTCentralDeviceFieldIds.Property.SwVersion]: osRelease() || '',
                     [IoTCentralDeviceFieldIds.Property.ProcessorArchitecture]: osArch() || '',
                     [IoTCentralDeviceFieldIds.Property.ProcessorManufacturer]: 'NVIDIA',
-                    [IoTCentralDeviceFieldIds.Property.TotalMemory]: systemProperties.totalMemory
+                    [IoTCentralDeviceFieldIds.Property.TotalMemory]: systemProperties.totalMemory,
+                    [ModuleInfoFieldIds.Property.RtspVideoUrl]: `rtsp://${this.moduleIpAddress}:8554/ds-test`,
+                    [ModuleInfoFieldIds.Property.VideoTaggingClientUrl]: `http://${this.moduleIpAddress}:3000`
                 };
                 this.logger.log(['IoTCentralService', 'info'], `Updating device properties: ${JSON.stringify(deviceProperties, null, 4)}`);
 
@@ -460,7 +428,7 @@ export class IoTCentralService {
         }
     }
 
-    public async getSystemProperties()c: Promise<ISystemProperties> {
+    public async getSystemProperties(): Promise<ISystemProperties> {
         const cpus = osCpus();
         const cpuUsageSamples = osLoadAvg();
 
@@ -517,30 +485,23 @@ export class IoTCentralService {
 
                 switch (setting) {
                     case ModuleInfoFieldIds.Setting.DemoMode:
-                        changedSettingResult = await this.moduleSettingChange(setting, _get(desiredChangedSettings, `${setting}.value`));
+                    case ModuleInfoFieldIds.Setting.AIModelProvider:
+                    case ModuleInfoFieldIds.Setting.CustomVisionModelUrl:
+                        changedSettingResult = await this.moduleSettingChange(setting, _get(desiredChangedSettings, `${setting}`));
                         needRestart = true;
+                        break;
+
+                    case ModuleInfoFieldIds.Setting.PrimaryDetectionClass:
+                    case ModuleInfoFieldIds.Setting.SecondaryDetectionClass:
+                        changedSettingResult = await this.moduleSettingChange(setting, _get(desiredChangedSettings, `${setting}`));
                         break;
 
                     case ModuleInfoFieldIds.Setting.VideoStreamInput1:
                     case ModuleInfoFieldIds.Setting.VideoStreamInput2:
-                    case ModuleInfoFieldIds.Setting.VideoStreamInput3:
-                    case ModuleInfoFieldIds.Setting.VideoStreamInput4:
-                    case ModuleInfoFieldIds.Setting.VideoStreamInput5:
-                    case ModuleInfoFieldIds.Setting.VideoStreamInput6:
-                    case ModuleInfoFieldIds.Setting.VideoStreamInput7:
-                    case ModuleInfoFieldIds.Setting.VideoStreamInput8:
                         changedSettingResult = await this.moduleSettingChange(setting, _get(desiredChangedSettings, `${setting}`));
                         needRestart = true;
                         break;
 
-                    case ModuleInfoFieldIds.Setting.ObjectsDetected:
-                        changedSettingResult = await this.moduleSettingChange(setting, _get(desiredChangedSettings, `${setting}`));
-                        break;
-                    
-                    case ModuleInfoFieldIds.Setting.AiModel:
-                        changedSettingResult = await this.moduleSettingChange(setting, _get(desiredChangedSettings, `${setting}`));
-                        needRestart = true;
-                        break;
                     default:
                         this.logger.log(['IoTCentralService', 'error'], `Received desired property change for unknown setting '${setting}'`);
                         break;
@@ -555,22 +516,7 @@ export class IoTCentralService {
                 await this.updateDeviceProperties(patchedProperties);
 
                 if (needRestart) {
-                    if (_get(this.demoMode) === true) {
-                        const setDemoStatus = await this.setDemoConfig();
-                        await this.sendMeasurement({
-                            [ModuleInfoFieldIds.State.PipelineState]: setDemoStatus === true ? PipelineState.Active : PipelineState.Inactive
-                        });
-                    }
-                    else {
-                        if (patchedProperties.hasOwnProperty(ModuleInfoFieldIds.Setting.AiModel)) {
-                            await downloadModel(_get(this.aiModelSettings.aiModelZip))
-                            await unzipModel()
-                        }
-                        await this.updateDSConfig();
-                        await this.updateMsgConvConfig();
-                        await this.updateInferConfig(this.aiModelSettings);
-                    }
-
+                    await this.server.methods.module.updateDSConfiguration();
                     await this.server.methods.device.restartDockerImage();
                 }
             }
@@ -592,27 +538,18 @@ export class IoTCentralService {
 
         switch (setting) {
             case ModuleInfoFieldIds.Setting.DemoMode:
-                result.value = this.demoMode = value;
+            case ModuleInfoFieldIds.Setting.AIModelProvider:
+            case ModuleInfoFieldIds.Setting.CustomVisionModelUrl:
+            case ModuleInfoFieldIds.Setting.PrimaryDetectionClass:
+            case ModuleInfoFieldIds.Setting.SecondaryDetectionClass:
+                result.value = this.detectionSettings[setting] = value || '';
                 break;
 
             case ModuleInfoFieldIds.Setting.VideoStreamInput1:
             case ModuleInfoFieldIds.Setting.VideoStreamInput2:
-            case ModuleInfoFieldIds.Setting.VideoStreamInput3:
-            case ModuleInfoFieldIds.Setting.VideoStreamInput4:
-            case ModuleInfoFieldIds.Setting.VideoStreamInput5:
-            case ModuleInfoFieldIds.Setting.VideoStreamInput6:
-            case ModuleInfoFieldIds.Setting.VideoStreamInput7:
-            case ModuleInfoFieldIds.Setting.VideoStreamInput8:
                 result.value = this.videoStreamInputSettings[setting] = value;
                 break;
 
-            case ModuleInfoFieldIds.Setting.ObjectsDetected:
-                result.value = this.objectDetectionSettings[setting] = value;
-                break;
-
-            case ModuleInfoFieldIds.Setting.AiModel:
-                result.value = this.aiModelSettings[setting] = value;
-                break;
             default:
                 this.logger.log(['IoTCentralService', 'info'], `Unknown module setting change request '${setting}'`);
                 result.status = false;
@@ -651,11 +588,11 @@ export class IoTCentralService {
                 }
             };
 
-            if (detectionClass.toUpperCase() === this.objectDetectionSettings.primaryObjectDetected.toUpperCase()) {
+            if (detectionClass.toUpperCase() === this.detectionSettings.wpPrimaryDetectionClass.toUpperCase()) {
                 ++primaryDetectionCount;
                 await this.sendInferenceData(inferenceData);
             }
-            else if (detectionClass.toUpperCase() === this.objectDetectionSettings.secondaryObjectDetected.toUpperCase()) {
+            else if (detectionClass.toUpperCase() === this.detectionSettings.wpSecondaryDetectionClass.toUpperCase()) {
                 ++secondaryDetectionCount;
                 await this.sendInferenceData(inferenceData);
             }
@@ -674,151 +611,6 @@ export class IoTCentralService {
         }
     }
 
-    private async setDemoConfig(): Promise<boolean> {
-        this.logger.log(['IoTCentralService', 'info'], `Setting up demo`);
-
-        try {
-            const cpCommand = `cp -f /data/misc/storage/carsConfig.txt /data/misc/storage/DSConfig.txt`;
-
-            await promisify(exec)(cpCommand);
-
-        }
-        catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Exception while updating DSConfig.txt: ${ex.message}`);
-        }
-
-        return true;
-
-    }
-
-    private async updateDSConfig(): Promise<boolean> {
-        let status = false;
-
-        try {
-            let activeStreams: number = 0;
-
-            for (const key in this.videoStreamInputSettings) {
-                if (!this.videoStreamInputSettings.hasOwnProperty(key)) {
-                    continue;
-                }
-
-                const input = this.videoStreamInputSettings[key];
-                if (Boolean(_get(input, 'cameraId')) && Boolean(_get(input, 'videoStreamUrl'))) {
-                    activeStreams++;
-                }
-            }
-
-            const rows = RowMap[activeStreams];
-            const batchSize = BatchSizeMap[activeStreams];
-            const columns = ColumnMap[activeStreams];
-            const engineFile = `resnet10.caffemodel_b${batchSize}_fp16.engine`;
-
-            const sedCommand = [`sed "`];
-            sedCommand.push(`s/###DISPLAY_ROWS/${rows}/g;`);
-            sedCommand.push(`s/###DISPLAY_COLUMNS/${columns}/g;`);
-            sedCommand.push(`s/###DISPLAY_WIDTH/${DisplayWidthMap[activeStreams]}/g;`);
-            sedCommand.push(`s/###DISPLAY_HEIGHT/${DisplayHeightMap[activeStreams]}/g;`);
-
-            for (const key in this.videoStreamInputSettings) {
-                if (!this.videoStreamInputSettings.hasOwnProperty(key)) {
-                    continue;
-                }
-
-                const configSource = DSConfigInputMap[key];
-                const input = this.videoStreamInputSettings[key];
-                const active = (Boolean(_get(input, 'cameraId')) && Boolean(_get(input, 'videoStreamUrl'))) === true ? '1' : '0';
-                const videoStreamUrl = (_get(input, 'videoStreamUrl') || '').replace(/\//g, '\\/');
-                const videoStreamType = videoStreamUrl.startsWith('rtsp') ? '4' : '3';
-                sedCommand.push(`s/###${configSource}_ENABLE/${active}/g;`);
-                sedCommand.push(`s/###${configSource}_TYPE/${videoStreamType}/g;`);
-                sedCommand.push(`s/###${configSource}_VIDEOSTREAM/${videoStreamUrl}/g;`);
-            }
-
-            sedCommand.push(`s/###BATCH_SIZE/${batchSize}/g;`);
-            sedCommand.push(`s/###ENGINE_FILE/${engineFile}/g;`);
-            sedCommand.push(`" /data/misc/storage/DSConfig_Template.txt > /data/misc/storage/DSConfig.txt`);
-
-            this.logger.log(['IoTCentralService', 'info'], `Executing sed command: ${sedCommand.join('')}`);
-
-            await promisify(exec)(sedCommand.join(''));
-
-            await this.sendMeasurement({
-                [ModuleInfoFieldIds.State.PipelineState]: activeStreams > 0 ? PipelineState.Active : PipelineState.Inactive
-            });
-
-            status = true;
-        }
-        catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Exception while updating DSConfig.txt: ${ex.message}`);
-        }
-
-        return status;
-    }
-
-    private async updateMsgConvConfig(): Promise<boolean> {
-        let status = false;
-
-        try {
-            const sedCommand = [`sed "`];
-
-            for (const key in this.videoStreamInputSettings) {
-                if (!this.videoStreamInputSettings.hasOwnProperty(key)) {
-                    continue;
-                }
-
-                const input = this.videoStreamInputSettings[key];
-                const cameraId = (_get(input, 'cameraId') || 'NOT_SET').replace(/\ /g, '_');
-                sedCommand.push(`s/###${MsgConvConfigMap[key]}_ID/${cameraId}/g;`);
-            }
-
-            sedCommand.push(`" /data/misc/storage/msgconv_config_template.txt > /data/misc/storage/msgconv_config.txt`);
-
-            this.logger.log(['IoTCentralService', 'info'], `Executing sed command: '${sedCommand.join('')}'`);
-
-            await promisify(exec)(sedCommand.join(''));
-            status = true;
-        }
-        catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Exception while updating DSConfig.txt: ${ex.message}`);
-        }
-
-        return status;
-    }
-
-    private async updateInferConfig(aiModelSettings : IAiModelSettings): Promise<boolean> {
-        let status = false;
-
-        try {
-            const sedCommand = [`sed "`];
-
-            if (aiModelSettings.aiModelProvider == 1) {
-                sedCommand.push(`" /data/misc/storage/config_infer_resnet10_template.txt > /data/misc/storage/config_infer.txt`);
-            }
-            else if (aiModelSettings.aiModelProvider == 2) {
-                const NbClasses = (_get(aiModelSettings.aiModelNbClasses) || 'NOT_SET').replace(/\ /g, '_');
-                sedCommand.push(`s/###${InferConfigMap.aiModelNbClasses}_ID/${NbClasses}/g;`);
-
-                const ModelURI = 'model.onnx'
-                sedCommand.push(`s/###${InferConfigMap.aiModelURI}_ID/${ModelURI}/g;`);
-
-                const LabelsURI = 'labels.txt'
-                sedCommand.push(`s/###${InferConfigMap.aiModelURI}_ID/${LabelsURI}/g;`);
-
-                sedCommand.push(`" /data/misc/storage/config_infer_custom_vision_template.txt > /data/misc/storage/config_infer.txt`);
-            }
-
-            this.logger.log(['IoTCentralService', 'info'], `Executing sed command: '${sedCommand.join('')}'`);
-
-            await promisify(exec)(sedCommand.join(''));
-            status = true;
-        }
-        catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Exception while updating config_infer.txt: ${ex.message}`);
-        }
-
-        return status;
-    }
-
     @bind
     // @ts-ignore (commandRequest)
     private async iotcClientRestartDeepStream(commandRequest: DeviceMethodRequest, commandResponse: DeviceMethodResponse) {
@@ -835,7 +627,7 @@ export class IoTCentralService {
     }
 
     @bind
-    // @ts-ignore (commandRequest)
+    // @ts-ignore (commandResponse)
     private async iotcClientRestartDevice(commandRequest: DeviceMethodRequest, commandResponse: DeviceMethodResponse) {
         this.logger.log(['IoTCentralService', 'info'], `${ModuleInfoFieldIds.Command.RestartDevice} command received`);
 

@@ -1,4 +1,0 @@
-# Tests
-
-## Run
-npm t
