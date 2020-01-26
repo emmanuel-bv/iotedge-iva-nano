@@ -528,7 +528,7 @@
                                                         "en": "className"
                                                     },
                                                     "name": "className",
-                                                    "schema": "integer"
+                                                    "schema": "string"
                                                 },
                                                 {
                                                     "@type": "SchemaField",
