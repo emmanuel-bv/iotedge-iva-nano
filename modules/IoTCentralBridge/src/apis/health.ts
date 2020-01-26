@@ -1,7 +1,9 @@
 import { inject, RoutePlugin, route } from 'spryly';
 import { Request, ResponseToolkit } from '@hapi/hapi';
 import { HealthService } from '../services/health';
-import * as Boom from '@hapi/boom';
+import {
+    badRequest as boom_badRequest
+} from '@hapi/boom';
 import * as _get from 'lodash.get';
 
 export class HealthRoutes extends RoutePlugin {
@@ -25,7 +27,7 @@ export class HealthRoutes extends RoutePlugin {
             return h.response(`HealthState: ${healthState}`).code(200);
         }
         catch (ex) {
-            throw Boom.badRequest(ex.message);
+            throw boom_badRequest(ex.message);
         }
     }
 }

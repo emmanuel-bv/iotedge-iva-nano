@@ -15,13 +15,13 @@ export class StorageService {
     @inject('logger')
     private logger: LoggingService;
 
-    private setupDone;
+    private setupDone = false;
     private storageDirectory;
 
     public async init() {
         this.logger.log(['StorageService', 'info'], 'initialize');
 
-        this.storageDirectory = pathResolve((this.server.settings.app as any).dataMiscRootDirectory, 'storage');
+        this.storageDirectory = (this.server.settings.app as any).dataMiscRootDirectory;
 
         await this.setup();
     }

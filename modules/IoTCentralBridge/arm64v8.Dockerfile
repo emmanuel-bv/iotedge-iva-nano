@@ -1,7 +1,8 @@
-FROM arm64v8/node:10-slim
+FROM arm64v8/node:13-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     net-tools \
+    unzip \
     systemd-sysv \
     && rm -rf /var/lib/apt/lists/*
 
@@ -21,12 +22,12 @@ RUN npm install -q && \
     rm -f tsconfig.json && \
     rm -rf src
 
-HEALTHCHECK \
-    --interval=30s \
-    --timeout=30s \
-    --start-period=60s \
-    --retries=3 \
-    CMD curl -f http://localhost:9014/health || exit 1
+# HEALTHCHECK \
+#     --interval=30s \
+#     --timeout=30s \
+#     --start-period=60s \
+#     --retries=3 \
+#     CMD curl -f http://localhost:9014/health || exit 1
 
 EXPOSE 9014
 
