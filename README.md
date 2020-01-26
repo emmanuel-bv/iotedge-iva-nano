@@ -15,24 +15,29 @@ We'll operate this solution with an aesthetic UI provided by [IoT Central](https
 - **Hardware**: You need a [NVIDIA Jetson Nano device](https://developer.nvidia.com/embedded/buy/jetson-nano-devkit) with a [5V-4A barrel jack power supply like this one](https://www.adafruit.com/product/1466), which are provided in this workshop.
 - **A laptop**: You need a laptop to connect to your Jetson Nano device and see its results with a browser and an ssh client.
 - **VLC**: To visualize the output of the Jetson Nano without HDMI screen (there is only one per table), we'll use VLC from your laptop to view a RTSP video stream of the processed videos. [Install VLC](https://www.videolan.org/vlc/index.html) if you dont have it yet.
-- **Have an Azure subscription**: Jetson Nano devices have been prepared to connect to the following IoT Central application: [https://deepstream-on-iot-edge.azureiotcentral.com/](https://deepstream-on-iot-edge.azureiotcentral.com/). Please ask for help if you cannot login to this application with your Microsoft account.
+- **Have an Azure subscription**: You need an Azure subscription to create an Azure IoT Central  application.
+- **Have a phone with IP Camera Lite app**: To view & process a live video stream, you can use your phone with the IP Camera Lite app ([iOS](https://apps.apple.com/us/app/ip-camera-lite/id1013455241), [Android](https://play.google.com/store/apps/details?id=com.shenyaocn.android.WebCam&hl=en_US)) as an IP camera.
 
-## Setup a new IoT Central app
+## Setting up a new IoT Central app
+
 Let's create a new IoT Central app to which we will connect our Jetson Nano later on.
 
 ### Create a new IoT Central app
+
 We'll start from a pre-built template of IoT Central, which already includes an application to see and command a video analytics solution running on the NVIDIA Jetson Nano.
-- From your browser, go to: https://apps.azureiotcentral.com/build/new/2b52603e-2eed-4e80-8b4b-b92b57032b17
+
+- From your browser, go to: https://apps.azureiotcentral.com/build/new/3009fff9-414b-4cec-8f51-5941e84d3bb3
 - Give a name and URL to your application
 - Select your Azure subscription (you can opt-in for a 7 day free trial)
 - Select your location
 - Click on `Create`
 
 ### Create an IoT Edge device from your IoT Central app
+
 We'll create a new IoT Edge device in your IoT Central application that will enable to the NVIDIA Jetson Nano to connect to IoT Central.
 
 - Go to the `Devices` tab
-- Select the `NVIDIA Jetson Nano (Airlift) v3` device template
+- Select the `NVIDIA Jetson Nano (Workshop)` device template
 - Click on `New`
 - Give a name to your device by editing the `Device ID` and the `Device name` fields (let's use the same name for both of these fields in this workshop)
 - Click on `Create`
@@ -56,9 +61,10 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
     ```bash
     cd /data
-    wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21587629&authkey=AI-nRpWZW8kOnrU"
+    wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21587635&authkey=AN6GmvgfYeq6fBw"
     tar -xjvf setup.tar.bz2
     ```
+
 5. Make the folder accessible from a normal user account:
 
     ```bash
@@ -75,58 +81,61 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
     sudo apt-get update
     sudo apt-get install iotedge
     ```
+
 7. Connect your device to your IoT Central application by editing IoT Edge configuration file:
 
-    * Use your favorite text editor to edit IoT Edge configuration file:
-    
+    - Use your favorite text editor to edit IoT Edge configuration file:
+
     ```bash
     sudo nano /etc/iotedge/config.yaml
     ```
 
-    * Comment out the "Manual provisioning configuration" section so it looks like this:
+    - Comment out the "Manual provisioning configuration" section so it looks like this:
 
     ```bash
     # Manual provisioning configuration
     #provisioning:
     #  source: "manual"
-    #  device_connection_string: ""      
+    #  device_connection_string: ""
     ```
 
-    * Uncomment the "DPS symmetric keyi provisioning configuration" and add your IoT Central app's scope id, registration_id which is your device Id and its primary symmetric key:
-      ```
-      # DPS symmetric key provisioning configuration
-      provisioning:
+    - Uncomment the "DPS symmetric keyi provisioning configuration" and add your IoT Central app's scope id, registration_id which is your device Id and its primary symmetric key:
+
+        ```bash
+        # DPS symmetric key provisioning configuration
+        provisioning:
         source: "dps"
         global_endpoint: "https://global.azure-devices-provisioning.net"
         scope_id: "<ID Scope>"
         attestation:
-          method: "symmetric_key"
-          registration_id: "<Device ID>"
-          symmetric_key: "<Primary Key>"
-      ```
-    * Save and exit your editor (Ctrl+O, Ctrl+X)
+            method: "symmetric_key"
+            registration_id: "<Device ID>"
+            symmetric_key: "<Primary Key>"
+        ```
 
-  * Now Restart the Azure IoT Edge runtime with the following command:
+    - Save and exit your editor (Ctrl+O, Ctrl+X)
+
+    - Now Restart the Azure IoT Edge runtime with the following command:
 
     ```bash
     sudo systemctl restart iotedge
     ```
 
-  * After a few moments the Edge runtime should restart and use the new DPS provisioning method you configured. When that happens successfully you will see a new device in your Azure IoT app under the Devices section.
-  * Follow the instructions in the [Azure IoT Central Documentation](https://docs.microsoft.com/en-us/azure/iot-central/) to add a dashboard view to your template to visualize the telemetry.
-    
+    - After a few moments the Edge runtime restarts and establishes a connection with your IoT Central application.
+
+Note that the first time that you connect your IoT Edge device to IoT Central, it will take time to start the entire solution since it first needs to download ~2Gbs of IoT Edge modules.
 
 ## Running the solution
 
 In the interest of time, we've already built a first solution that is composed of two main blocks:
 
-1. **NVIDIA DeepStream** to do all the video processing
+1. **NVIDIA DeepStream** does all the video processing
 
     The first component, DeepStream, was trivial to build since it has been published by NVIDIA in the [Azure Marketplace here](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/nvidia.deepstream-iot?tab=Overview). We're using this module as-is and are only configuring it from the IoT Central bridge module.
 
 ![Deepsteam in Azure Marketplace](./assets/DeepstreamInMarketplace.png "NVIDIA Deepstream in Azure Marketplace")
 
-1. A **bridge to IoT Central** to transform DeepStream telemetry into a format understood by IoT Central and to configure DeepStream remotely. It formats all telemetry, properties, and commands using PnP. 
+2. A **bridge to IoT Central** transforms DeepStream telemetry into a format understood by IoT Central and configures DeepStream remotely. It formats all telemetry, properties, and commands using PnP.
 
 Let's see it in action!
 
@@ -161,50 +170,52 @@ From your favourite SSH client:
     ```
 
 2. Open up the configuration file of DeepStream to understand its structure:
-    
+
     ```bash
     nano /data/misc/storage/DSconfig.txt
     ```
 
 Observe in particular:
 
-   - the `sources` sections: they define where the source videos are coming from. We're using local videos to begin with and will switch to live RTSP streams later on.
-   - the `sink` sections: they define where to output of the processed videos and the output messages. We use RTSP to stream a video feed out and all out messages are sent to the Azure IoT Edge runtime.
-   - the `primary-gie` section: it defines which AI model is used to detect objects. It also defines how this AI model is applied. As an example, note the `interval` property set to `4`: this means that inferencing is actually executed only once every 5 frames. Bounding boxes are displayed continuously though because a tracking algorithm, which is computationally less expensive than inferencing, takes over in between. The tracking algorithm used is set in the `tracking` section. This is the kind of out-of-the-box optimizations provided by DeepStream that enables us to process 240 frames per second on a $100 device. Other notable optimizations are using hardware decoders, doing zero in-memory copy, pushing the vast majority of the processing to the GPU, batching frames from multiple streams, etc.
+- The `sources` sections: they define where the source videos are coming from. We're using local videos to begin with and will switch to live RTSP streams later on.
+- The `sink` sections: they define where to output of the processed videos and the output messages. We use RTSP to stream a video feed out and all out messages are sent to the Azure IoT Edge runtime.
+- The `primary-gie` section: it defines which AI model is used to detect objects. It also defines how this AI model is applied. As an example, note the `interval` property set to `4`: this means that inferencing is actually executed only once every 5 frames. Bounding boxes are displayed continuously though because a tracking algorithm, which is computationally less expensive than inferencing, takes over in between. The tracking algorithm used is set in the `tracking` section. This is the kind of out-of-the-box optimizations provided by DeepStream that enables us to process 240 frames per second on a $100 device. Other notable optimizations are using hardware decoders, doing zero in-memory copy, pushing the vast majority of the processing to the GPU, batching frames from multiple streams, etc.
 
 ### Understanding the connection to IoT Central
 
 IoT Edge connects to IoT Central with the regular Module SDK. Telemetry, Properties and Commands that the IoT Edge Central bridge module sends follow a PnP format, enforced in the Cloud by IoT Central. IoT Central enforces them against a Device Capability Model, which is a file that defines what this IoT Edge device is capable of doing.
 
 - Click on `Devices` in the left nav of the IoT Central application
-- Observe the templates in the second column: they define all the devices that this IoT Central application understands. All the Jetson Nano devices of this workshop are using a version of the `NVIDIA Jetson Nano (Airlift)` device template. In the case of IoT Edge, an IoT Edge deployment manifest is attached to a DCM version to create a device template. If you want to see the details on how a Device Capability Model look like, you can look at (this file in this repo)[https://github.com/ebertrams/iotedge-iva-nano/blob/IoTCentralBridge-CV/settings/NVIDIAJetsonNanoDcm.json]. 
+- Observe the templates in the second column: they define all the devices that this IoT Central application understands. All the Jetson Nano devices of this workshop are using a version of the `NVIDIA Jetson Nano (Airlift)` device template. In the case of IoT Edge, an IoT Edge deployment manifest is attached to a DCM version to create a device template. If you want to see the details on how a Device Capability Model look like, you can look at [this file in this repo](https://github.com/ebertrams/iotedge-iva-nano/blob/IoTCentralBridge-CV/settings/NVIDIAJetsonNanoDcm.json).
 
 ## Operating the solution
 
-Now that we understand how the application has been built, let's operate it with IoT Central. To demonstrate how to remotely manage this solution, we'll send a command to the device to change its input cameras.
+Now that we understand how the application has been built, let's operate it with IoT Central. To demonstrate how to remotely manage this solution, we'll send a command to the device to change its input cameras. We'll use your phone as an RTSP camera as a new input camera.
 
 ![IoT Central](./assets/IoTCentral.png "IoT Central UI to remotely manage NVIDIA Jetson devices")
 
 ### Changing input cameras
 
-Before switching the application to a different camera, let's just verify that the camera is functional. With VLC: 
+Let's first verify that your phone works as an RTSP camera properly:
+
+- Open the the IP Camera Lite
+- Go to Settings and remove the User and Password on the RTSP feed
+- Click on `Turn on IP Camera Server`
+
+
+Let's just verify that the camera is functional. With VLC:
 
 - Go to `Media` > `Open Network Stream`
-- Paste the following `RTSP Video URL`:  rtmp://visionaistreams.westus2.cloudapp.azure.com/visionai/west-team-room-srt-2600.stream
-- Click `Play` and verify that an indoor camera is properly displaying. If this video feed does not work, please move on to the next section.
+- Paste the following `RTSP Video URL`:  `rtsp://your-phone-ip-address:8554/live`
+- Click `Play` and verify that phone's camera is properly displaying.
 
-You can do the same with the second indoor camera: rtmp://visionaistreams.westus2.cloudapp.azure.com/visionai/east-team-room-srt-2601.stream
-
-Now, let's update the solution to use these indoor cameras. In IoT Central:
+Let's now update your Jetson Nano to use your phone's camera. In IoT Central:
 
 - Go to the `Manage` tab
-- Unselect the `Demo Mode`, which uses 8 hardcoded video files as input of car traffic
+- Unselect the `Demo Mode`, which uses several hardcoded video files as input of car traffic
 - Update the `Video Stream 1` property:
-    - In the `cameraId`, name your camera, for instance `indoor Camera 1`
-    - In the `videoStreamUrl`, enter the RTSP stream of this camera: rtmp://visionaistreams.westus2.cloudapp.azure.com/visionai/west-team-room-srt-2600.stream
-- Update the `Video Stream 2` property:
-    - In the `cameraId`, name your camera, for instance `indoor Camera 2`
-    - In the `videoStreamUrl`, enter the RTSP stream of this camera: rtmp://visionaistreams.westus2.cloudapp.azure.com/visionai/east-team-room-srt-2601.stream
+    - In the `cameraId`, name your camera, for instance `My Phone`
+    - In the `videoStreamUrl`, enter the RTSP stream of this camera: `rtsp://your-phone-ip-address:8554/live`
 - Keep the default AI model of DeepStream by keeping the value `DeepStream ResNet 10` as the `AI model type`.
 - Keep the default `Primary Detection Class` as `person`
 - Hit `Save`
@@ -213,7 +224,7 @@ This sends a command to the device to update its DeepStream configuration file w
 
 Within a minute, DeepStream should restart. You can observe its status in IoT Central via the `Modules` tab. Once `deepstream` module is back to `Running`, copy again the `RTSP Video Url` field from the `Device` tab and give it to VLC (`Media` > `Open Network Stream` > paste the `RTSP Video URL` > `Play`).
 
-You should now detect people from 2 indoor cameras. The count of `Person` in the `dashboard` tab in IoT Central should go up. We've just remotely updated the configuration of this intelligent video analytics solution!
+You should now detect people from your phone's camera. The count of `Person` in the `dashboard` tab in IoT Central should go up. We've just remotely updated the configuration of this intelligent video analytics solution!
 
 ## Use an AI model to detect custom visual anomalies
 
@@ -221,6 +232,7 @@ A soda can manufaturer wants to improve the efficienty of its plant. He would li
 We'll use cameras to monitor each of the lines and we'll collect images and build a custom AI model to detects cans that are up or down. We'll then deploy this custom AI model to DeepStream via IoT Central. To do a quick Proof Of Concept, we'll use the [Custom Vision service](https://www.customvision.ai/), a no-code computer vision AI model builder.
 
 As a pre-requisite, let's create a new Custom Vision project in your subscription:
+
 - Go to [http://customvision.ai](https://www.customvision.ai/)
 - Sign-in
 - Create a new Project
@@ -234,15 +246,16 @@ We then need to collect images to build a custom AI model. To do that, we'll use
 From the Camera Tagging Module:
 
 - Connect to one of the camera of the manufacturing line:
-   - 'Change camera' (you may have to scroll down to see the button)
-   - Add a new camera with the following RTSP value: rtsp://cam-cans-01.westus.azurecontainer.io:8554/live.sdp
+    - `Change camera` (you may have to scroll down to see the button)
+    - Add your phone's camera as a new RTSP camera
 - Capture a few images of cans that are up and cans that are down
 - Once a few images have been capture, go to upload and enter your Custom Vision settings
 - Finally, go to the image gallery, select the ones that you want to upload and upload them to Custom Vision
 
-In the interest of time, [here](https://1drv.ms/u/s!AEzLzaBpSgoMo-1l) (https://1drv.ms/u/s!AEzLzaBpSgoMo-1l) is a set of images that have already been captured for you that you can upload to Custom Vision. Download it, unzip it and upload all the images into your Custom Vision project.
+In the interest of time, [here](https://1drv.ms/u/s!AEzLzaBpSgoMo-1l) is a set of images that have already been captured for you that you can upload to Custom Vision. Download it, unzip it and upload all the images into your Custom Vision project.
 
 We then need to label all of them:
+
 - Click on one image
 - Label the cans that are up as `Up` and the ones that are down as `Down`
 - Hit the right arrow to move on to the next image and label the remaining 70+ images...or read below to use a pre-built one with this set of images
@@ -250,10 +263,10 @@ We then need to label all of them:
 - To export it, go to the `Performance` tab, click on `Export` and choose `ONNX`
 - Right-click on the `Download` button and select `copy link address` to copy the anonymous location of a zip file of your ccustom model
 
-In the interest of time, you can use the following pre-built Custom Vision model for this use case:
-https://irisprodwu2training.blob.core.windows.net/m-cab1e73a2d5043709139ca73f8fdcd1a/d26d3cdca28a4c3d815393cbfc853f1c.ONNX.zip?sv=2017-04-17&sr=b&sig=hVE6YzZBVsB2WciZExHZWeWvY1UjZUQB4MdbtooD%2Fj8%3D&se=2020-01-15T15%3A46%3A48Z&sp=r
+In the interest of time, you can use [this pre-built Custom Vision model](https://1drv.ms/u/s!AEzLzaBpSgoMo-50).
 
 Finally, we'll deploy this custom vision model to the Jetson Nano using IoT Central. In IoT Central:
+
 - Go to the `Manage` tab (beware of the sorting o f the fields)
 - Make sure the `Demo Mode` is unchecked
 - The 3 input video for 3 manufacturing lines have been hardcoded into the device to avoid network issues. You would normally have to input valid RTSP input sources in the first 3 Video Stream Url properties. You can put any values for now in these fields.
@@ -269,40 +282,3 @@ We are now visualizing the processing of 3 real time (e.g. 30fps 1080p) video fe
 ![Custom Vision](./assets/sodaCans.png "3 soda cans manufacturing lines are bieing monitored with a custom AI model built with Custom Vision")
 
 Thank you for attending this workshop! There are other content that you can try with your Jetson Nano at [http://aka.ms/jetson-on-azure](http://aka.ms/jetson-on-azure)!
-
-# APPENDIX A - Setup your Jetson Nano device
-
-The Jetson Nano devices have been flashed with almost everything that is needed. A few extra steps are required though to finalize its configuration:
-
-- Update its hostname. Replace `00` in instructions below by your device number:
-
-```bash
-sudo hostnamectl set-hostname jetson-nano-00
-sudo nano /etc/hosts
-```
-    
-    - Edit the hostname in /etc/hosts
-    - Save (CTRL+O) and exit (CTRL+X).
-
-- Edit the permissions of the IoT Edge configuration file:
-
-```bash
-sudo chmod 755 /etc/iotedge/config.yaml
-```
-
-- Edit the IoT Edge configuration file:
-
-```bash
-sudo nano /etc/iotedge/config.yaml
-```
-
-    - Update the registration_id in the provisioning section to be your device hostname `jetson-nano-00`
-    - Copy the device key from IoT Central (Go to the device > click `Connect` in the top right corner and copy the `Primary key`) and paste it as the symmetric_key in the provisioning section
-    - Towards the bottom of the configuration file, update the device hostname
-
-
-- Reboot
-
-Your device should now be connected to IoT Central. Go to its dashboard to verify that it is the case (it may take a couple of minutes).
-
-
