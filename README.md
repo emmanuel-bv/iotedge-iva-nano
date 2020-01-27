@@ -61,8 +61,8 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
     ```bash
     cd /data
-    wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21587635&authkey=AN6GmvgfYeq6fBw"
-    tar -xjvf setup.tar.bz2
+    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21587635&authkey=AN6GmvgfYeq6fBw"
+    sudo tar -xjvf setup.tar.bz2
     ```
 
 5. Make the folder accessible from a normal user account:
