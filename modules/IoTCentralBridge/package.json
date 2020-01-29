@@ -1,6 +1,6 @@
 {
   "name": "nvidia-nano-airlift",
-  "version": "1.0.17",
+  "version": "1.0.26",
   "description": "NVIDIA Jetson Nano IoT Central module",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "tslint": "node ./node_modules/tslint/bin/tslint -p ./tsconfig.json",
     "build": "node ./node_modules/typescript/bin/tsc -p .",
     "dockerbuild": "node ./scripts/dockerBuild.js --docker-build",
+    "dockerpush": "node ./scripts/dockerBuild.js --docker-push",
     "preversion": "npm test",
     "version": "node ./scripts/dockerBuild.js --docker-build",
     "postversion": "node ./scripts/dockerBuild.js --docker-push",

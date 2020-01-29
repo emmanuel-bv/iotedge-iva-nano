@@ -41,7 +41,8 @@ export const IoTCentralDeviceFieldIds = {
         ProcessorArchitecture: 'processorArchitecture',
         ProcessorManufacturer: 'processorManufacturer',
         TotalStorage: 'totalStorage',
-        TotalMemory: 'totalMemory'
+        TotalMemory: 'totalMemory',
+        GpuProcessor: 'gpuProcessor'
     }
 };
 
@@ -90,7 +91,7 @@ export enum RestartDeviceCommandParams {
 
 export const ModuleInfoFieldIds = {
     Telemetry: {
-        CameraSystemHeartbeat: 'tlSystemHeartbeat',
+        SystemHeartbeat: 'tlSystemHeartbeat',
         PrimaryDetectionCount: 'tlPrimaryDetectionCount',
         SecondaryDetectionCount: 'tlSecondaryDetectionCount',
         Inference: 'tlInference',
@@ -156,6 +157,7 @@ export class IoTCentralService {
     private iotcTelemetryThrottleTimer: number = Date.now();
     private inferenceThrottle: number = defaultInferenceThrottle;
     private inferenceRateCount: number = 0;
+    private pipelineState: boolean = false;
     private detectionSettingsInternal: IDetectionSettings = {
         wpDemoMode: true,
         wpAIModelProvider: 'CustomVision',
@@ -441,9 +443,23 @@ export class IoTCentralService {
         };
     }
 
+    public async setPipelineState(pipelineState: PipelineState) {
+        const newPipelineState = pipelineState === PipelineState.Active ? true : false;
+
+        if (newPipelineState !== this.pipelineState) {
+            await this.sendMeasurement({
+                [ModuleInfoFieldIds.State.PipelineState]: pipelineState
+            });
+        }
+
+        this.pipelineState = newPipelineState;
+    }
+
     @bind
     private async onHandleDownstreamMessages(inputName, message) {
         // this.logger.log(['IoTCentralService', 'info'], `Received downstream message: ${JSON.stringify(message, null, 4)}`);
+
+        await this.setPipelineState(PipelineState.Active);
 
         this.inferenceRateCount++;
 
@@ -559,10 +575,15 @@ export class IoTCentralService {
     }
 
     private async processDeepStreamInference(messageData: any): Promise<any> {
-        if (!messageData || !this.iotcClientConnected || ((Date.now() - this.iotcTelemetryThrottleTimer) < this.inferenceThrottle)) {
+        const currentThrottleValue = Date.now() - this.iotcTelemetryThrottleTimer;
+        if (!messageData || !this.iotcClientConnected || currentThrottleValue < this.inferenceThrottle) {
             return;
         }
         this.iotcTelemetryThrottleTimer = Date.now();
+
+        if (_get(process.env, 'DEBUG_TELEMETRY') === '1') {
+            this.logger.log(['IoTCentralService', 'info'], `Processing downstream data`);
+        }
 
         const messageJson = JSON.parse(messageData);
         const cameraId = _get(messageJson, 'sensorId') || 'Unknown';

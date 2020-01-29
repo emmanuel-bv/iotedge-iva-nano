@@ -60,7 +60,7 @@
                   },
                   "IoTCentralBridge": {
                       "settings": {
-                          "image": "$CONTAINER_REGISTRY_ADDRESS/nvidia-nano-airlift:1.0.17-arm64v8",
+                          "image": "$CONTAINER_REGISTRY_ADDRESS/nvidia-nano-airlift:1.0.26-arm64v8",
                           "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"9014/tcp\":[{\"HostPort\":\"9014\"}]},\"Binds\":[\"/data/misc:/data/misc\",\"/run/systemd:/run/systemd\",\"/var/run/docker.sock:/var/run/docker.sock\"],\"NetworkMode\":\"host\",",
                           "createOptions01": "\"Healthcheck\": {\"Test\": [\"CMD-SHELL\",\"curl -f http://localhost:9014/health || exit 1\"],\"Interval\": 30000000000,\"Timeout\": 30000000000,\"Retries\": 3,\"StartPeriod\": 60000000000}},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}}}"
                       },

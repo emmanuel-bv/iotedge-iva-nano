@@ -2,7 +2,6 @@ import { service, inject } from 'spryly';
 import { Server } from '@hapi/hapi';
 import { ConfigService } from './config';
 import { LoggingService } from './logging';
-import { DeviceService } from './device';
 import {
     ModuleInfoFieldIds,
     ModuleState,
@@ -67,9 +66,6 @@ export class ModuleService {
     @inject('logger')
     private logger: LoggingService;
 
-    @inject('device')
-    private device: DeviceService;
-
     @inject('iotCentral')
     private iotCentral: IoTCentralService;
 
@@ -112,13 +108,11 @@ export class ModuleService {
 
             this.logger.log(['ModuleService', 'info'], `Health check iot:${iotCentralHealth}`);
 
-            await this.device.restartDevice(10, 'ModuleService:getHealth');
-
             return HealthState.Critical;
         }
 
         await this.iotCentral.sendMeasurement({
-            [ModuleInfoFieldIds.Telemetry.CameraSystemHeartbeat]: iotCentralHealth
+            [ModuleInfoFieldIds.Telemetry.SystemHeartbeat]: iotCentralHealth
         });
 
         return HealthState.Good;
@@ -309,7 +303,6 @@ export class ModuleService {
     private async saveDSResNetDemoConfiguration() {
         this.logger.log(['ModuleService', 'info'], `Setting carsDemo configuration`);
         await promisify(exec)(`cp ${pathResolve(this.storageFolderPath, 'ResNetSetup', 'configs', 'carsConfig.txt')} ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
-        await promisify(exec)(`cp ${pathResolve(this.storageFolderPath, 'ResNetSetup', 'configs', 'msgconv_config.txt')} ${pathResolve(this.storageFolderPath, 'msgconv_config.txt')}`);
     }
 
     private async saveDSResNetConfiguration(): Promise<boolean> {
@@ -361,9 +354,7 @@ export class ModuleService {
 
             await promisify(exec)(sedCommand.join(''));
 
-            await this.iotCentral.sendMeasurement({
-                [ModuleInfoFieldIds.State.PipelineState]: activeStreams > 0 ? PipelineState.Active : PipelineState.Inactive
-            });
+            await this.iotCentral.setPipelineState(activeStreams > 0 ? PipelineState.Active : PipelineState.Inactive);
 
             await this.saveDSMsgConvConfiguration();
 
@@ -444,9 +435,7 @@ export class ModuleService {
 
             await promisify(exec)(`cp ${pathResolve(this.onnxConfigFolderPath, 'onnxConfig_template.txt')} ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
 
-            await this.iotCentral.sendMeasurement({
-                [ModuleInfoFieldIds.State.PipelineState]: PipelineState.Active
-            });
+            await this.iotCentral.setPipelineState(PipelineState.Active);
 
             status = true;
         }

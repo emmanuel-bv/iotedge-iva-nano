@@ -52,9 +52,10 @@ export class DeviceService {
     public async restartDeepStream(): Promise<void> {
         await this.iotCentral.sendMeasurement({
             [ModuleInfoFieldIds.Event.VideoStreamProcessingStopped]: 'NVIDIA DeepStream',
-            [ModuleInfoFieldIds.State.ModuleState]: ModuleState.Inactive,
-            [ModuleInfoFieldIds.State.PipelineState]: PipelineState.Inactive
+            [ModuleInfoFieldIds.State.ModuleState]: ModuleState.Inactive
         });
+
+        await this.iotCentral.setPipelineState(PipelineState.Inactive);
 
         return this.restartDockerImage();
     }
@@ -70,9 +71,10 @@ export class DeviceService {
             await this.iotCentral.sendMeasurement({
                 [ModuleInfoFieldIds.Event.DeviceRestart]: reason,
                 [ModuleInfoFieldIds.Event.VideoStreamProcessingStopped]: 'NVIDIA DeepStream',
-                [ModuleInfoFieldIds.State.ModuleState]: ModuleState.Inactive,
-                [ModuleInfoFieldIds.State.PipelineState]: PipelineState.Inactive
+                [ModuleInfoFieldIds.State.ModuleState]: ModuleState.Inactive
             });
+
+            await this.iotCentral.setPipelineState(PipelineState.Inactive);
 
             if (timeout > 0) {
                 await new Promise((resolve) => {
