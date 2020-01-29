@@ -49,7 +49,7 @@ We'll create a new IoT Edge device in your IoT Central application that will ena
 
 We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files locally that are needed for the application such as video files to simulate RTSP cameras and deepstream configuration files, and install IoT Edge.
 
-1. Follow the [instructions for creating a NVIDIA Jetson Nano base image](https://developer.nvidia.com/embedded/jetson-nano-developer-kit)
+1. Follow the [instructions for creating a NVIDIA Jetson Nano base image with JetPack 4.3](https://developer.nvidia.com/embedded/jetson-nano-developer-kit)
 2. Optionally [create a swapfile on the Jetson Nano](https://github.com/JetsonHacksNano/installSwapfile) to gain a bit more memory.
 3. On your Jetson Nano create a folder name `data` at the root:
 
@@ -61,7 +61,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
     ```bash
     cd /data
-    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588067&authkey=AHdENUEwNjr_WxE"
+    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588068&authkey=AEpYWAwzKhiLHys"
     sudo tar -xjvf setup.tar.bz2
     ```
 
