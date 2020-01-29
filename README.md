@@ -26,7 +26,7 @@ Let's create a new IoT Central app to which we will connect our Jetson Nano late
 
 We'll start from a pre-built template of IoT Central, which already includes an application to see and command a video analytics solution running on the NVIDIA Jetson Nano.
 
-- From your browser, go to: https://apps.azureiotcentral.com/build/new/3009fff9-414b-4cec-8f51-5941e84d3bb3
+- From your browser, go to: https://apps.azureiotcentral.com/build/new/fe45a50f-cd2a-4092-a371-2c279c57d6fd
 - Give a name and URL to your application
 - Select your Azure subscription (you can opt-in for a 7 day free trial)
 - Select your location
@@ -37,7 +37,7 @@ We'll start from a pre-built template of IoT Central, which already includes an 
 We'll create a new IoT Edge device in your IoT Central application that will enable to the NVIDIA Jetson Nano to connect to IoT Central.
 
 - Go to the `Devices` tab
-- Select the `NVIDIA Jetson Nano (Workshop)` device template
+- Select the `NVIDIA Jetson Nano -- RTSP Output` device template
 - Click on `New`
 - Give a name to your device by editing the `Device ID` and the `Device name` fields (let's use the same name for both of these fields in this workshop)
 - Click on `Create`
@@ -61,7 +61,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
     ```bash
     cd /data
-    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21587635&authkey=AN6GmvgfYeq6fBw"
+    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588067&authkey=AHdENUEwNjr_WxE"
     sudo tar -xjvf setup.tar.bz2
     ```
 
@@ -263,7 +263,7 @@ We then need to label all of them:
 - To export it, go to the `Performance` tab, click on `Export` and choose `ONNX`
 - Right-click on the `Download` button and select `copy link address` to copy the anonymous location of a zip file of your ccustom model
 
-In the interest of time, you can use [this pre-built Custom Vision model](https://1drv.ms/u/s!AEzLzaBpSgoMo-50).
+In the interest of time, you can use [this pre-built Custom Vision model](https://onedrive.live.com/download?0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21587636&authkey=AOCf3YsqcZM_3WM).
 
 Finally, we'll deploy this custom vision model to the Jetson Nano using IoT Central. In IoT Central:
 
