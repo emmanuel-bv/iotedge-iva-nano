@@ -1,6 +1,6 @@
 {
   "name": "nvidia-nano-airlift",
-  "version": "1.0.26",
+  "version": "1.0.33",
   "description": "NVIDIA Jetson Nano IoT Central module",
   "main": "index.js",
   "scripts": {
