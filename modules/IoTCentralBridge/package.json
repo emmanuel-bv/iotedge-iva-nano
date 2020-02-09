@@ -1,6 +1,6 @@
 {
-  "name": "nvidia-nano-airlift",
-  "version": "1.0.33",
+  "name": "iot-central-bridge",
+  "version": "0.0.50",
   "description": "NVIDIA Jetson Nano IoT Central module",
   "main": "index.js",
   "scripts": {
