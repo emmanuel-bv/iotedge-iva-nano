@@ -1,5 +1,5 @@
 {
-    "@id": "urn:AzureIoT:NVIDIAJetsonNano:1",
+    "@id": "urn:AzureIoT:NVIDIAJetsonNano4Streams:1",
     "@type": "CapabilityModel",
     "implements": [],
     "displayName": {
@@ -19,7 +19,7 @@
             "maxMultiplicity": 1,
             "target": [
                 {
-                    "@id": "urn:AzureIoT:IoTCentralBridge:1",
+                    "@id": "urn:AzureIoT:NVIDIAJetsonNano4Streams:IoTCentralBridge:1",
                     "@type": "CapabilityModel",
                     "implements": [
                         {
@@ -29,7 +29,7 @@
                             },
                             "name": "Settings",
                             "schema": {
-                                "@id": "urn:AzureIoT:IoTCentralBridge:ISettings:1",
+                                "@id": "urn:AzureIoT:NVIDIAJetsonNano4Streams:IoTCentralBridge:ISettings:1",
                                 "@type": "Interface",
                                 "displayName": {
                                     "en": "Settings"
@@ -231,134 +231,6 @@
                                                 }
                                             ]
                                         }
-                                    },
-                                    {
-                                        "@type": "Property",
-                                        "displayName": {
-                                            "en": "Video Stream Input 5"
-                                        },
-                                        "name": "wpVideoStreamInput5",
-                                        "writable": true,
-                                        "schema": {
-                                            "@type": "Object",
-                                            "displayName": {
-                                                "en": "Object"
-                                            },
-                                            "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "cameraId"
-                                                    },
-                                                    "name": "cameraId",
-                                                    "schema": "string"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "videoStreamUrl"
-                                                    },
-                                                    "name": "videoStreamUrl",
-                                                    "schema": "string"
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        "@type": "Property",
-                                        "displayName": {
-                                            "en": "Video Stream Input 6"
-                                        },
-                                        "name": "wpVideoStreamInput6",
-                                        "writable": true,
-                                        "schema": {
-                                            "@type": "Object",
-                                            "displayName": {
-                                                "en": "Object"
-                                            },
-                                            "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "cameraId"
-                                                    },
-                                                    "name": "cameraId",
-                                                    "schema": "string"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "videoStreamUrl"
-                                                    },
-                                                    "name": "videoStreamUrl",
-                                                    "schema": "string"
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        "@type": "Property",
-                                        "displayName": {
-                                            "en": "Video Stream Input 7"
-                                        },
-                                        "name": "wpVideoStreamInput7",
-                                        "writable": true,
-                                        "schema": {
-                                            "@type": "Object",
-                                            "displayName": {
-                                                "en": "Object"
-                                            },
-                                            "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "cameraId"
-                                                    },
-                                                    "name": "cameraId",
-                                                    "schema": "string"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "videoStreamUrl"
-                                                    },
-                                                    "name": "videoStreamUrl",
-                                                    "schema": "string"
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    {
-                                        "@type": "Property",
-                                        "displayName": {
-                                            "en": "Video Stream Input 8"
-                                        },
-                                        "name": "wpVideoStreamInput8",
-                                        "writable": true,
-                                        "schema": {
-                                            "@type": "Object",
-                                            "displayName": {
-                                                "en": "Object"
-                                            },
-                                            "fields": [
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "cameraId"
-                                                    },
-                                                    "name": "cameraId",
-                                                    "schema": "string"
-                                                },
-                                                {
-                                                    "@type": "SchemaField",
-                                                    "displayName": {
-                                                        "en": "videoStreamUrl"
-                                                    },
-                                                    "name": "videoStreamUrl",
-                                                    "schema": "string"
-                                                }
-                                            ]
-                                        }
                                     }
                                 ]
                             }
@@ -464,7 +336,7 @@
                                 "en": "Module Information"
                             },
                             "schema": {
-                                "@id": "urn:AzureIoT:IoTCentralBridge:IModuleInformation:1",
+                                "@id": "urn:AzureIoT:NVIDIAJetsonNano4Streams:IoTCentralBridge:IModuleInformation:1",
                                 "@type": "Interface",
                                 "displayName": {
                                     "en": "Module Information"
