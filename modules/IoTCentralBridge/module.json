@@ -2,9 +2,9 @@
     "$schema-version": "0.0.1",
     "description": "",
     "image": {
-        "repository": "ebertrams/iotcentralbridge",
+        "repository": "ebertraacr.azurecr.io/iotcentralbridge",
         "tag": {
-            "version": "0.0.1",
+            "version": "0.0.50",
             "platforms": {
                 "arm64v8": "./arm64v8.Dockerfile"
             }

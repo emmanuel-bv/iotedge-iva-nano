@@ -574,15 +574,15 @@ export class IoTCentralService {
         return result;
     }
 
-    private async processDeepStreamInference(messageData: any): Promise<any> {
-        const currentThrottleValue = Date.now() - this.iotcTelemetryThrottleTimer;
-        if (!messageData || !this.iotcClientConnected || currentThrottleValue < this.inferenceThrottle) {
+    private async processDeepStreamInference(messageData: any) {
+        if (!messageData || !this.iotcClientConnected || ((Date.now() - this.iotcTelemetryThrottleTimer) < this.inferenceThrottle)) {
             return;
         }
         this.iotcTelemetryThrottleTimer = Date.now();
 
-        if (_get(process.env, 'DEBUG_TELEMETRY') === '1') {
+        if (_get(process.env, 'DEBUG_ROUTING_DATA') === '1') {
             this.logger.log(['IoTCentralService', 'info'], `Processing downstream data`);
+            this.logger.log(['IoTCentralService', 'info'], `messageData: ${messageData}`);
         }
 
         const messageJson = JSON.parse(messageData);
@@ -593,7 +593,7 @@ export class IoTCentralService {
 
         for (const detection of detections) {
             const detectionFields = detection.split('|');
-            const detectionClass = detectionFields[5] || 'Unknown';
+            const detectionClass = (detectionFields[5] || 'Unknown').trim();
 
             const inferenceData = {
                 [ModuleInfoFieldIds.Telemetry.Inference]: {
