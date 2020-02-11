@@ -31,18 +31,38 @@
                       "restartPolicy": "always",
                       "settings": {
                           "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
-                          "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+                          "createOptions": {
+                            "HostConfig": {
+                                "PortBindings": {
+                                  "5671/tcp": [
+                                    {
+                                      "HostPort": "5671"
+                                    }
+                                  ],
+                                  "8883/tcp": [
+                                    {
+                                      "HostPort": "8883"
+                                    }
+                                  ],
+                                  "443/tcp": [
+                                    {
+                                      "HostPort": "443"
+                                    }
+                                  ]
+                                }
+                              }
+                          }
                       },
                       "env": {
-                          "usePersistentStorage": {
-                              "value": false
-                          },
-                          "amqpSettings__enabled": {
-                              "value": false
-                          },
-                          "httpSettings__enabled": {
-                              "value": false
-                          }
+                        "usePersistentStorage": {
+                            "value": false
+                        },
+                        "amqpSettings__enabled": {
+                            "value": false
+                        },
+                        "httpSettings__enabled": {
+                            "value": false
+                        }
                       }
                   }
               },
@@ -53,65 +73,63 @@
                       "status": "running",
                       "restartPolicy": "always",
                       "settings": {
-                          "image": "$CONTAINER_REGISTRY_ADDRESS/nvidia/deepstream-l4t:4.0.2-19.12-iot",
-                          "createOptions": "{\"HostConfig\":{\"runtime\":\"nvidia\",\"Binds\":[\"/data/misc/storage:/data/misc/storage\"],\"NetworkMode\":\"host\"},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}},\"WorkingDir\":\"/data/misc/storage\",",
-                          "createOptions01": "\"Entrypoint\":[\"/usr/bin/deepstream-test5-app\",\"-c\",\"DSConfig.txt\"]}"
+                          "image": "marketplace.azurecr.io/nvidia/deepstream-iot2-l4t:latest",
+                          "createOptions": {
+                            "Entrypoint": [
+                                "/usr/bin/deepstream-test5-app",
+                                "-c",
+                                "DSConfig.txt"
+                            ],
+                            "HostConfig": {
+                                "runtime": "nvidia",
+                                "NetworkMode": "host",
+                                "Binds": ["/data/misc/storage:/data/misc/storage"]
+                                },
+                            "NetworkingConfig": {"EndpointsConfig": {"host":{}}},
+                            "WorkingDir": "/data/misc/storage"
+                        }
                       }
                   },
                   "IoTCentralBridge": {
                       "settings": {
-                          "image": "$CONTAINER_REGISTRY_ADDRESS/nvidia-nano-airlift:1.0.26-arm64v8",
-                          "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"9014/tcp\":[{\"HostPort\":\"9014\"}]},\"Binds\":[\"/data/misc:/data/misc\",\"/run/systemd:/run/systemd\",\"/var/run/docker.sock:/var/run/docker.sock\"],\"NetworkMode\":\"host\",",
-                          "createOptions01": "\"Healthcheck\": {\"Test\": [\"CMD-SHELL\",\"curl -f http://localhost:9014/health || exit 1\"],\"Interval\": 30000000000,\"Timeout\": 30000000000,\"Retries\": 3,\"StartPeriod\": 60000000000}},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}}}"
+                          "image": "${MODULES.IoTCentralBridge.arm64v8}",
+                          "createOptions": {
+                            "HostConfig": {
+                                "PortBindings": {
+                                  "9010/tcp": [
+                                    {
+                                      "HostPort": "9014"
+                                    }
+                                  ]
+                                },
+                                "Binds": [
+                                    "/data/misc:/data/misc",
+                                    "/run/systemd:/run/systemd",
+                                    "/var/run/docker.sock:/var/run/docker.sock"
+                                ],
+                                "NetworkMode": "host"
+                              },
+                            "NetworkingConfig": {"EndpointsConfig": {"host":{}}}
+                          }
                       },
                       "type": "docker",
                       "env": {
-                          "DEBUG_TELEMETRY": {
-                              "value": "1"
-                          }
+                        "DEBUG_TELEMETRY": {
+                            "value": "1"
+                        },
+                        "DEBUG_ROUTING_DATA": {
+                            "value": "0"
+                        },
+                        "inferenceThrottle": {
+                            "value": 2000
+                        },
+                        "FORCE_HEALTHCHECK": {
+                            "value": "1"
+                        }
                       },
                       "status": "running",
                       "restartPolicy": "always",
                       "version": "1.0"
-                  },
-                  "CameraTaggingModule": {
-                      "version": "1.0",
-                      "type": "docker",
-                      "status": "running",
-                      "restartPolicy": "always",
-                      "settings": {
-                        "image": "$CONTAINER_REGISTRY_ADDRESS/camerataggingmodule:0.0.1-arm32v7",
-                        "createOptions": "{\"ExposedPorts\":{\"3000/tcp\":{},\"3002/tcp\":{},\"3003/tcp\":{}},\"HostConfig\":{\"PortBindings\":{\"3000/tcp\":[{\"HostPort\":\"3000\"}],\"3002/tcp\":[{\"HostPort\":\"3002\"}],\"3003/tcp\":[{\"HostPort\":\"3003\"}]}}}"
-                      },
-                      "env": {
-                        "RTSP_IP": {
-                          "value": "170.93.143.139"
-                        },
-                        "RTSP_PORT": {
-                          "value": "554"
-                        },
-                        "RTSP_PATH": {
-                          "value": "rtplive/0f019fd7443a0032004606363d235daa"
-                        },
-                        "REACT_APP_SERVER_PORT": {
-                          "value": "3003"
-                        },
-                        "REACT_APP_WEB_SOCKET_PORT": {
-                          "value": "3002"
-                        },
-                        "REACT_APP_LOCAL_STORAGE_MODULE_NAME": {
-                          "value": "azureblobstorageoniotedge"
-                        },
-                        "REACT_APP_LOCAL_STORAGE_PORT": {
-                          "value": "11002"
-                        },
-                        "REACT_APP_LOCAL_STORAGE_ACCOUNT_NAME": {
-                          "value": "<local-storage-account-name>"
-                        },
-                        "REACT_APP_LOCAL_STORAGE_ACCOUNT_KEY": {
-                          "value": "<local_storage_key>"
-                        }
-                      }
                   }
               }
           }
@@ -121,10 +139,10 @@
               "schemaVersion": "1.0",
               "routes": {
                   "NVDSToIoTCBridge": "FROM /messages/modules/deepstream/outputs/* INTO BrokeredEndpoint(\"/modules/IoTCentralBridge/inputs/dsmessages\")",
-                  "filterToIoTHub": "FROM /messages/* INTO $upstream"
+                  "filterToIoTHub": "FROM /messages/modules/IoTCentralBridge/* INTO $upstream"
               },
               "storeAndForwardConfiguration": {
-                  "timeToLiveSecs": 7200
+                  "timeToLiveSecs": 1
               }
           }
       },
