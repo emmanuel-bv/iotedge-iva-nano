@@ -139,7 +139,7 @@ In the interest of time, we've already built a first solution that is composed o
 
 Let's see it in action!
 
-1. Plug your device, press the power button and give it a few minutes to boot. It should automatically connect to the conference's wifi, start its application thanks to IoT Edge and report back its usage and IP address to IoT Central.
+1. Plug your device, and give it a few minutes to boot. It should automatically connect to the conference's wifi, start its application thanks to IoT Edge and report back its usage and IP address to IoT Central.
 2. Connect to [this IoT Central application](https://deepstream-on-iot-edge.azureiotcentral.com/) with your Microsoft account. Please ask for help if you dont have access.
 3. Go to `Devices` and find the device number corresponding to your Jetson Nano (You should have received this number from the proctors and will range from 01-45, for example if you received 01 then your device will be jetson-nano-01)
 4. Click on this device and go to the `Dashboard` tab
