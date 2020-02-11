@@ -321,6 +321,7 @@ export class ModuleService {
             }
         }
 
+        this.logger.log(['ModuleService', 'info'], `Nb of active streams:` + activeStreams);
         return activeStreams;
     }
 
@@ -417,7 +418,7 @@ export class ModuleService {
             const activeStreams = this.getActiveStreams();
             const sedCommands = this.computeDSConfiguration(activeStreams);
 
-            sedConfigInferCommands.push(`" ${pathResolve(this.onnxConfigFolderPath, 'onnxConfig_template.txt')} > ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
+            sedCommands.push(`" ${pathResolve(this.onnxConfigFolderPath, 'onnxConfig_template.txt')} > ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
 
             this.logger.log(['ModuleService', 'info'], `Executing sed command: ${sedCommands.join('')}`);
 
