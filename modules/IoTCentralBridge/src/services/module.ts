@@ -49,8 +49,8 @@ const MsgConvConfigMap = {
     wpVideoStreamInput8: 'SENSOR7'
 };
 
-const RowMap = ['1', '1', '1', '1', '1', '2', '2', '2', '2'];
-const ColumnMap = ['1', '1', '2', '4', '4', '4', '4', '4', '4'];
+const RowMap = ['1', '1', '2', '2', '2', '2', '2', '2', '2'];
+const ColumnMap = ['1', '1', '2', '2', '4', '4', '4', '4', '4'];
 const BatchSizeMap = ['1', '1', '2', '8', '8', '8', '8', '8', '8'];
 const DisplayWidthMap = ['1280', '1280', '1280', '1280', '1280', '1280', '1280', '1280', '1280'];
 const DisplayHeightMap = ['720', '720', '720', '720', '720', '720', '720', '720', '720'];
@@ -321,7 +321,7 @@ export class ModuleService {
             }
         }
 
-        this.logger.log(['ModuleService', 'info'], `Nb of active streams:` + activeStreams);
+        this.logger.log(['ModuleService', 'info'], `Nb of active streams: ${activeStreams}`);
         return activeStreams;
     }
 

@@ -117,7 +117,9 @@ export const ModuleInfoFieldIds = {
         PrimaryDetectionClass: 'wpPrimaryDetectionClass',
         SecondaryDetectionClass: 'wpSecondaryDetectionClass',
         VideoStreamInput1: 'wpVideoStreamInput1',
-        VideoStreamInput2: 'wpVideoStreamInput2'
+        VideoStreamInput2: 'wpVideoStreamInput2',
+        VideoStreamInput3: 'wpVideoStreamInput3',
+        VideoStreamInput4: 'wpVideoStreamInput4'
     },
     Property: {
         RtspVideoUrl: 'rpRtspVideoUrl',
@@ -514,6 +516,8 @@ export class IoTCentralService {
 
                     case ModuleInfoFieldIds.Setting.VideoStreamInput1:
                     case ModuleInfoFieldIds.Setting.VideoStreamInput2:
+                    case ModuleInfoFieldIds.Setting.VideoStreamInput3:
+                    case ModuleInfoFieldIds.Setting.VideoStreamInput4:
                         changedSettingResult = await this.moduleSettingChange(setting, _get(desiredChangedSettings, `${setting}`));
                         needRestart = true;
                         break;
@@ -563,6 +567,8 @@ export class IoTCentralService {
 
             case ModuleInfoFieldIds.Setting.VideoStreamInput1:
             case ModuleInfoFieldIds.Setting.VideoStreamInput2:
+            case ModuleInfoFieldIds.Setting.VideoStreamInput3:
+            case ModuleInfoFieldIds.Setting.VideoStreamInput4:
                 result.value = this.videoStreamInputSettings[setting] = value;
                 break;
 
