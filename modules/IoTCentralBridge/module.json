@@ -4,7 +4,7 @@
     "image": {
         "repository": "$CONTAINER_REGISTRY_ADDRESS/iotcentralbridge",
         "tag": {
-            "version": "0.0.51",
+            "version": "0.0.52",
             "platforms": {
                 "arm64v8": "./arm64v8.Dockerfile"
             }
