@@ -303,92 +303,73 @@ export class ModuleService {
     private async saveDSResNetDemoConfiguration() {
         this.logger.log(['ModuleService', 'info'], `Setting carsDemo configuration`);
         await promisify(exec)(`cp ${pathResolve(this.storageFolderPath, 'ResNetSetup', 'configs', 'carsConfig.txt')} ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
+
+        await this.iotCentral.setPipelineState(PipelineState.Active);
+    }
+
+    private getActiveStreams(): number {
+        let activeStreams: number = 0;
+
+        for (const key in this.iotCentral.videoStreamInputSettings) {
+            if (!this.iotCentral.videoStreamInputSettings.hasOwnProperty(key)) {
+                continue;
+            }
+
+            const input = this.iotCentral.videoStreamInputSettings[key];
+            if (_get(input, 'cameraId') && _get(input, 'videoStreamUrl')) {
+                activeStreams++;
+            }
+        }
+
+        return activeStreams;
+    }
+
+    private computeDSConfiguration(activeStreams: number): string[] {
+        const rows = RowMap[activeStreams];
+        const columns = ColumnMap[activeStreams];
+
+        const sedCommands = [`sed "`];
+        sedCommands.push(`s/###DISPLAY_ROWS/${rows}/g;`);
+        sedCommands.push(`s/###DISPLAY_COLUMNS/${columns}/g;`);
+        sedCommands.push(`s/###DISPLAY_WIDTH/${DisplayWidthMap[activeStreams]}/g;`);
+        sedCommands.push(`s/###DISPLAY_HEIGHT/${DisplayHeightMap[activeStreams]}/g;`);
+
+        for (const key in this.iotCentral.videoStreamInputSettings) {
+            if (!this.iotCentral.videoStreamInputSettings.hasOwnProperty(key)) {
+                continue;
+            }
+
+            const configSource = DSConfigInputMap[key];
+            const input = this.iotCentral.videoStreamInputSettings[key];
+            const active = (_get(input, 'cameraId') && _get(input, 'videoStreamUrl')) ? '1' : '0';
+            const videoStreamUrl = (_get(input, 'videoStreamUrl') || '').replace(/\//g, '\\/');
+            const videoStreamType = videoStreamUrl.startsWith('rtsp') ? '4' : '3';
+            sedCommands.push(`s/###${configSource}_ENABLE/${active}/g;`);
+            sedCommands.push(`s/###${configSource}_TYPE/${videoStreamType}/g;`);
+            sedCommands.push(`s/###${configSource}_VIDEOSTREAM/${videoStreamUrl}/g;`);
+        }
+
+        return sedCommands;
     }
 
     private async saveDSResNetConfiguration(): Promise<boolean> {
         let status = false;
 
         try {
-            let activeStreams: number = 0;
+            const activeStreams = this.getActiveStreams();
+            const sedCommands = this.computeDSConfiguration(activeStreams);
 
-            for (const key in this.iotCentral.videoStreamInputSettings) {
-                if (!this.iotCentral.videoStreamInputSettings.hasOwnProperty(key)) {
-                    continue;
-                }
+            sedCommands.push(`s/###BATCH_SIZE/${BatchSizeMap[activeStreams]}/g;`);
+            sedCommands.push(`" ${pathResolve(this.storageFolderPath, 'ResNetSetup', 'configs', 'DSConfig_Template.txt')} > ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
 
-                const input = this.iotCentral.videoStreamInputSettings[key];
-                if (_get(input, 'cameraId') && _get(input, 'videoStreamUrl')) {
-                    activeStreams++;
-                }
-            }
+            this.logger.log(['ModuleService', 'info'], `Executing sed command: ${sedCommands.join('')}`);
 
-            const rows = RowMap[activeStreams];
-            const batchSize = BatchSizeMap[activeStreams];
-            const columns = ColumnMap[activeStreams];
-
-            const sedCommand = [`sed "`];
-            sedCommand.push(`s/###DISPLAY_ROWS/${rows}/g;`);
-            sedCommand.push(`s/###DISPLAY_COLUMNS/${columns}/g;`);
-            sedCommand.push(`s/###DISPLAY_WIDTH/${DisplayWidthMap[activeStreams]}/g;`);
-            sedCommand.push(`s/###DISPLAY_HEIGHT/${DisplayHeightMap[activeStreams]}/g;`);
-
-            for (const key in this.iotCentral.videoStreamInputSettings) {
-                if (!this.iotCentral.videoStreamInputSettings.hasOwnProperty(key)) {
-                    continue;
-                }
-
-                const configSource = DSConfigInputMap[key];
-                const input = this.iotCentral.videoStreamInputSettings[key];
-                const active = (_get(input, 'cameraId') && _get(input, 'videoStreamUrl')) ? '1' : '0';
-                const videoStreamUrl = (_get(input, 'videoStreamUrl') || '').replace(/\//g, '\\/');
-                const videoStreamType = videoStreamUrl.startsWith('rtsp') ? '4' : '3';
-                sedCommand.push(`s/###${configSource}_ENABLE/${active}/g;`);
-                sedCommand.push(`s/###${configSource}_TYPE/${videoStreamType}/g;`);
-                sedCommand.push(`s/###${configSource}_VIDEOSTREAM/${videoStreamUrl}/g;`);
-            }
-
-            sedCommand.push(`s/###BATCH_SIZE/${batchSize}/g;`);
-            sedCommand.push(`" ${pathResolve(this.storageFolderPath, 'ResNetSetup', 'configs', 'DSConfig_Template.txt')} > ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
-
-            this.logger.log(['ModuleService', 'info'], `Executing sed command: ${sedCommand.join('')}`);
-
-            await promisify(exec)(sedCommand.join(''));
+            await promisify(exec)(sedCommands.join(''));
 
             await this.iotCentral.setPipelineState(activeStreams > 0 ? PipelineState.Active : PipelineState.Inactive);
 
-            await this.saveDSMsgConvConfiguration();
+            await this.saveDSMsgConvConfiguration(pathResolve(this.storageFolderPath, 'ResNetSetup', 'configs', 'msgconv_config_template.txt'));
 
-            status = true;
-        }
-        catch (ex) {
-            this.logger.log(['ModuleService', 'error'], `Exception while updating DSConfig.txt: ${ex.message}`);
-        }
-
-        return status;
-    }
-
-    private async saveDSMsgConvConfiguration(): Promise<boolean> {
-        let status = false;
-
-        try {
-            const sedCommand = [`sed "`];
-
-            for (const key in this.iotCentral.videoStreamInputSettings) {
-                if (!this.iotCentral.videoStreamInputSettings.hasOwnProperty(key)) {
-                    continue;
-                }
-
-                const input = this.iotCentral.videoStreamInputSettings[key];
-                const cameraId = (_get(input, 'cameraId') || 'NOT_SET').replace(/\ /g, '_');
-                sedCommand.push(`s/###${MsgConvConfigMap[key]}_ID/${cameraId}/g;`);
-            }
-
-            // tslint:disable-next-line:max-line-length
-            sedCommand.push(`" ${pathResolve(this.storageFolderPath, 'ResNetSetup', 'configs', 'msgconv_config_template.txt')} > ${pathResolve(this.storageFolderPath, 'msgconv_config.txt')}`);
-
-            this.logger.log(['ModuleService', 'info'], `Executing sed command: '${sedCommand.join('')}'`);
-
-            await promisify(exec)(sedCommand.join(''));
             status = true;
         }
         catch (ex) {
@@ -425,22 +406,61 @@ export class ModuleService {
             const numClasses = labelData.split('\n').length;
             this.logger.log(['ModuleService', 'info'], `Number of class labels detected: ${numClasses}`);
 
-            const sedCommand = [`sed "`];
-            sedCommand.push(`s/###CLASSES_COUNT/${numClasses}/g;`);
-            sedCommand.push(`" ${pathResolve(this.onnxConfigFolderPath, 'config_infer_onnx_template.txt')} > ${pathResolve(this.onnxConfigFolderPath, 'config_infer_onnx.txt')}`);
+            const sedConfigInferCommands = [`sed "`];
+            sedConfigInferCommands.push(`s/###CLASSES_COUNT/${numClasses}/g;`);
+            sedConfigInferCommands.push(`" ${pathResolve(this.onnxConfigFolderPath, 'config_infer_onnx_template.txt')} > ${pathResolve(this.onnxConfigFolderPath, 'config_infer_onnx.txt')}`);
 
-            this.logger.log(['ModuleService', 'info'], `Executing sed command: ${sedCommand.join('')}`);
+            this.logger.log(['ModuleService', 'info'], `Executing sed command: ${sedConfigInferCommands.join('')}`);
 
-            await promisify(exec)(sedCommand.join(''));
+            await promisify(exec)(sedConfigInferCommands.join(''));
 
-            await promisify(exec)(`cp ${pathResolve(this.onnxConfigFolderPath, 'onnxConfig_template.txt')} ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
+            const activeStreams = this.getActiveStreams();
+            const sedCommands = this.computeDSConfiguration(activeStreams);
 
-            await this.iotCentral.setPipelineState(PipelineState.Active);
+            sedConfigInferCommands.push(`" ${pathResolve(this.onnxConfigFolderPath, 'onnxConfig_template.txt')} > ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
+
+            this.logger.log(['ModuleService', 'info'], `Executing sed command: ${sedCommands.join('')}`);
+
+            await promisify(exec)(sedCommands.join(''));
+
+            await this.iotCentral.setPipelineState(activeStreams > 0 ? PipelineState.Active : PipelineState.Inactive);
+
+            await this.saveDSMsgConvConfiguration(pathResolve(this.onnxConfigFolderPath, 'msgconv_config_template.txt'));
 
             status = true;
         }
         catch (ex) {
             this.logger.log(['ModuleService', 'error'], `Exception while updating DSConfig.txt: ${ex.message}`);
+        }
+
+        return status;
+    }
+
+    private async saveDSMsgConvConfiguration(configFilePath: string): Promise<boolean> {
+        let status = false;
+
+        try {
+            const sedCommands = [`sed "`];
+
+            for (const key in this.iotCentral.videoStreamInputSettings) {
+                if (!this.iotCentral.videoStreamInputSettings.hasOwnProperty(key)) {
+                    continue;
+                }
+
+                const input = this.iotCentral.videoStreamInputSettings[key];
+                const cameraId = (_get(input, 'cameraId') || 'NOT_SET').replace(/\ /g, '_');
+                sedCommands.push(`s/###${MsgConvConfigMap[key]}_ID/${cameraId}/g;`);
+            }
+
+            sedCommands.push(`" ${pathResolve(configFilePath, 'msgconv_config_template.txt')} > ${pathResolve(configFilePath, 'msgconv_config.txt')}`);
+
+            this.logger.log(['ModuleService', 'info'], `Executing sed command: '${sedCommands.join('')}'`);
+
+            await promisify(exec)(sedCommands.join(''));
+            status = true;
+        }
+        catch (ex) {
+            this.logger.log(['ModuleService', 'error'], `Exception while updating msgconv_config.txt: ${ex.message}`);
         }
 
         return status;

@@ -142,7 +142,15 @@
               "wpVideoStreamInput2": {
                   "cameraId": "",
                   "cameraRtspUrl": ""
-              }
+              },
+            "wpVideoStreamInput3": {
+                "cameraId": "",
+                "cameraRtspUrl": ""
+            },
+            "wpVideoStreamInput4": {
+                "cameraId": "",
+                "cameraRtspUrl": ""
+            }
           }
       }
   }
