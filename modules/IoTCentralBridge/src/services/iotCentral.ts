@@ -64,10 +64,6 @@ interface IVideoStreamInputSettings {
     wpVideoStreamInput2: IVideoStreamInput;
     wpVideoStreamInput3: IVideoStreamInput;
     wpVideoStreamInput4: IVideoStreamInput;
-    wpVideoStreamInput5: IVideoStreamInput;
-    wpVideoStreamInput6: IVideoStreamInput;
-    wpVideoStreamInput7: IVideoStreamInput;
-    wpVideoStreamInput8: IVideoStreamInput;
 }
 
 export enum ModuleState {
@@ -181,22 +177,6 @@ export class IoTCentralService {
             videoStreamUrl: ''
         },
         wpVideoStreamInput4: {
-            cameraId: '',
-            videoStreamUrl: ''
-        },
-        wpVideoStreamInput5: {
-            cameraId: '',
-            videoStreamUrl: ''
-        },
-        wpVideoStreamInput6: {
-            cameraId: '',
-            videoStreamUrl: ''
-        },
-        wpVideoStreamInput7: {
-            cameraId: '',
-            videoStreamUrl: ''
-        },
-        wpVideoStreamInput8: {
             cameraId: '',
             videoStreamUrl: ''
         }
