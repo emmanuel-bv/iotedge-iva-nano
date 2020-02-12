@@ -1,6 +1,6 @@
 # Visual Anomaly Detection over multiple cameras with NVIDIA Jetson Nano devices workshop
 
-In this workshop, you'll discover how to build a solution that can process up to 8 real-time video streams with an AI model on a $100 device, how to remotely operate your device, and demonstrate how you can deploy custom AI models to it.
+In this workshop, you'll discover how to build a solution that can process up several real-time video streams with an AI model on a $100 device, how to remotely operate your device, and demonstrate how you can deploy custom AI models to it.
 
 With this solution, you can transform cameras into sensors to know when there is an available parking spot, a missing product on a retail store shelf, an anomaly on a solar panel, a worker approaching a hazardous zone., etc.
 
@@ -26,7 +26,7 @@ Let's create a new IoT Central app to which we will connect our Jetson Nano late
 
 We'll start from a pre-built template of IoT Central, which already includes an application to see and command a video analytics solution running on the NVIDIA Jetson Nano.
 
-- From your browser, go to: https://apps.azureiotcentral.com/build/new/fe45a50f-cd2a-4092-a371-2c279c57d6fd
+- From your browser, go to: https://apps.azureiotcentral.com/build/new/af1fe1b4-d92e-45fc-9d1f-ea4decdc961d
 - Give a name and URL to your application
 - Select your Azure subscription (you can opt-in for a 7 day free trial)
 - Select your location
@@ -37,7 +37,7 @@ We'll start from a pre-built template of IoT Central, which already includes an 
 We'll create a new IoT Edge device in your IoT Central application that will enable to the NVIDIA Jetson Nano to connect to IoT Central.
 
 - Go to the `Devices` tab
-- Select the `NVIDIA Jetson Nano -- RTSP Output` device template
+- Select the `NVIDIA Jetson Nano DCM` device template
 - Click on `New`
 - Give a name to your device by editing the `Device ID` and the `Device name` fields (let's use the same name for both of these fields in this workshop)
 - Click on `Create`
@@ -50,8 +50,7 @@ We'll create a new IoT Edge device in your IoT Central application that will ena
 We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files locally that are needed for the application such as video files to simulate RTSP cameras and deepstream configuration files, and install IoT Edge.
 
 1. Follow the [instructions for creating a NVIDIA Jetson Nano base image with JetPack 4.3](https://developer.nvidia.com/embedded/jetson-nano-developer-kit)
-2. Optionally [create a swapfile on the Jetson Nano](https://github.com/JetsonHacksNano/installSwapfile) to gain a bit more memory.
-3. On your Jetson Nano create a folder name `data` at the root:
+2. On your Jetson Nano create a folder name `data` at the root:
 
     ```bash
     sudo mkdir /data
@@ -61,7 +60,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
     ```bash
     cd /data
-    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?cid=0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588408&authkey=ALZecJdhgTgQM-8"
+    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?cid=0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588425&authkey=AAZkjybAWRaCfCc"
     sudo tar -xjvf setup.tar.bz2
     ```
 
