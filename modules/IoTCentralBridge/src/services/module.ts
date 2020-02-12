@@ -32,22 +32,14 @@ const DSConfigInputMap = {
     wpVideoStreamInput1: 'SOURCE0',
     wpVideoStreamInput2: 'SOURCE1',
     wpVideoStreamInput3: 'SOURCE2',
-    wpVideoStreamInput4: 'SOURCE3',
-    wpVideoStreamInput5: 'SOURCE4',
-    wpVideoStreamInput6: 'SOURCE5',
-    wpVideoStreamInput7: 'SOURCE6',
-    wpVideoStreamInput8: 'SOURCE7'
+    wpVideoStreamInput4: 'SOURCE3'
 };
 
 const MsgConvConfigMap = {
     wpVideoStreamInput1: 'SENSOR0',
     wpVideoStreamInput2: 'SENSOR1',
     wpVideoStreamInput3: 'SENSOR2',
-    wpVideoStreamInput4: 'SENSOR3',
-    wpVideoStreamInput5: 'SENSOR4',
-    wpVideoStreamInput6: 'SENSOR5',
-    wpVideoStreamInput7: 'SENSOR6',
-    wpVideoStreamInput8: 'SENSOR7'
+    wpVideoStreamInput4: 'SENSOR3'
 };
 
 const defaultRowMap = '1:1:1:2:2:4:4:4:4';
