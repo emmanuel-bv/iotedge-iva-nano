@@ -103,7 +103,7 @@ head -n 1 /etc/nv_tegra_release
 
         ```bash
         cd /data
-        sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?cid=0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588425&authkey=AAZkjybAWRaCfCc"
+        sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?cid=0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588426&authkey=AHkFd5UO8lgD4SQ"
         sudo tar -xjvf setup.tar.bz2
         ```
 
