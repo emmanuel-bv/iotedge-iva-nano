@@ -1,5 +1,5 @@
 {
-    "@id": "urn:AzureIoT:NVIDIAJetsonNano4Streams:1",
+    "@id": "urn:AzureIoT:NVIDIAJetsonNano:1",
     "@type": "CapabilityModel",
     "implements": [],
     "displayName": {
@@ -19,7 +19,7 @@
             "maxMultiplicity": 1,
             "target": [
                 {
-                    "@id": "urn:AzureIoT:NVIDIAJetsonNano4Streams:IoTCentralBridge:1",
+                    "@id": "urn:AzureIoT:IoTCentralBridge:1",
                     "@type": "CapabilityModel",
                     "implements": [
                         {
@@ -29,7 +29,7 @@
                             },
                             "name": "Settings",
                             "schema": {
-                                "@id": "urn:AzureIoT:NVIDIAJetsonNano4Streams:IoTCentralBridge:ISettings:1",
+                                "@id": "urn:AzureIoT:IoTCentralBridge:ISettings:1",
                                 "@type": "Interface",
                                 "displayName": {
                                     "en": "Settings"
@@ -336,7 +336,7 @@
                                 "en": "Module Information"
                             },
                             "schema": {
-                                "@id": "urn:AzureIoT:NVIDIAJetsonNano4Streams:IoTCentralBridge:IModuleInformation:1",
+                                "@id": "urn:AzureIoT:IoTCentralBridge:IModuleInformation:1",
                                 "@type": "Interface",
                                 "displayName": {
                                     "en": "Module Information"
