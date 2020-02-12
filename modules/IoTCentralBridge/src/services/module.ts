@@ -52,7 +52,7 @@ const MsgConvConfigMap = {
 
 const defaultRowMap = '1:1:1:2:2:4:4:4:4';
 const defaultColumnMap = '1:1:2:2:2:2:2:2:2';
-const defaultBatchSizeMap = '1:1:2:8:8:8:8:8:8';
+const defaultBatchSizeMap = '1:1:2:4:4:8:8:8:8';
 const defaultDisplayWidthMap = '1280:1280:1280:1280:1280:1280:1280:1280:1280';
 const defaultDisplayHeightMap = '720:720:720:720:720:720:720:720:720';
 
