@@ -1,5 +1,7 @@
 # Visual Anomaly Detection over multiple cameras with NVIDIA Jetson Nano devices workshop
 
+These instructions let you reproduce this workshop at home.
+
 In this workshop, you'll discover how to build a solution that can process several real-time video streams with an AI model on a $100 device, how to build your own AI model to detect custom anomalies and finally how to operate it remotely.
 
 We'll put ourselves in the shoes of a soda can manufacturer who wants to improve the efficienty of its plant. An improvement that he'd like to make is to be able to detect soda cans that fell down on his production lines, monitor his production lines from home and be alerted when this happen. He has 3 production lines, all moving at a fairly quick speed.
@@ -13,9 +15,39 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
 
 ![Jetson Nano](./assets/JetsonNano.png "NVIDIA Jetson Nano device used to run Deepstream with IoT Edge")
 
+- **Flash your Jetson Nano SD Card**: download and flash either this [JetPack version 4.3 image](https://developer.nvidia.com/embedded/jetpack) if you have an HDMI screen or the [image from this NVIDIA course](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info) otherwise. The image from the course is also based on JetPack 4.3 but includes an USB Device Mode to use the Jetson Nano without HDMI screen. For the rest of this tutorial will assume that you use the device in USB Device Mode. In any cases, you can use [BalenaEtcher](https://www.balena.io/etcher/) tool to flash your SD card. Both of these images are based on Ubuntu 18.04 and already includes NVIDIA drivers version, CUDA and Nvidia-Docker.
+
+```bash
+head -n 1 /etc/nv_tegra_release
+```
+
+- **A developer's machine**: You need a developer's machine (Windows, Linux or Mac) to connect to your Jetson Nano device and see its results with a browser and an ssh client.
+
 - **Connect your Jetson Nano to your developer's machine with the USB Device Mode**: we'll do that by plugging a micro-USB cable from your Jetson Nano to your developer's machine and using the USB Device Mode provided in [NVIDIA's course base image](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info). With this mode, you do not need to hook up a monitor directly to your Jetson Nano. Instead, boot your device and wait for 30 seconds then open your favorite browser, go to [http://192.168.55.1:8888](http://192.168.55.1:8888) and enter the password `dlinano` to get access to a command line on your Jetson Nano.
 
 ![Jupyter Notebook](./assets/JupyterNotebook.png "Jetson Nano controlled by a Jupyter Notebook via the USB Device Mode")
+
+- **Connect your Jetson Nano to the internet**: Either use an ethernet connection, in which case you can skip this section or connect your device to WiFi using the above USB Device Mode terminal:
+
+    To connect your Jetson to a WiFi network from a terminal, follow these steps
+
+    1. Re-scan available WiFi networks
+
+        ```bash
+        nmcli device wifi rescan
+        ```
+
+    2. List available WiFi networks, and find the ``ssid_name`` of your network.
+
+        ```bash
+        nmcli device wifi list
+        ```
+
+    3. Connect to a selected WiFi network
+
+        ```bash
+        nmcli device wifi connect <ssid_name> password <password>
+        ```
 
 - **Connect your Jetson Nano to an SSH client**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client.
 
@@ -31,7 +63,9 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
         ssh dlinano@your-ip-address
         ```
 
-- **Install VLC to view RTSP video streams**: On your developer's machine, [install VLC](https://www.videolan.org/vlc/index.html).
+- **VLCi on your developer's machine**: To visualize the output of the Jetson Nano without HDMI screen (there is only one per table), we'll use VLC from your laptop to view a RTSP video stream of the processed videos. [Install VLC](https://www.videolan.org/vlc/index.html) if you dont have it yet.
+- **An Azure subscription**: You need an Azure subscription to create an Azure IoT Central  application.
+- **A phone with IP Camera Lite app**: To view & process a live video stream, you can use your phone with the IP Camera Lite app ([iOS](https://apps.apple.com/us/app/ip-camera-lite/id1013455241), [Android](https://play.google.com/store/apps/details?id=com.shenyaocn.android.WebCam&hl=en_US)) as an IP camera.
 
 The next sections walks you step-by-step to deploy Deepstream on an IoT Edge device, update its configuration via a pre-built IoT Central application and build a custom AI model with Custom Vision. It explains concepts along the way.
 
@@ -366,5 +400,7 @@ This is the end of the workshop. Because there will be another session that uses
 ## Going further
 
 Thank you for attending this workshop! We hope that you enjoyed it and found it valuable.
+
+If you want to run this workwhop at home, you can use [this set of instructions](AtHomeWorkshopInstructions.md), which can work with your own resources at home.
 
 There are other content that you can try with your Jetson Nano at [http://aka.ms/jetson-on-azure](http://aka.ms/jetson-on-azure)!
