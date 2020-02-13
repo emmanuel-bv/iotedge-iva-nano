@@ -87,7 +87,7 @@ Observe in particular:
 - The `sink` sections: they define where to output the processed videos and the output messages. We use RTSP to stream a video feed out and all out messages are sent to the Azure IoT Edge runtime.
 - The `primary-gie` section: it defines which AI model is used to detect objects. It also defines how this AI model is applied. As an example, note the `interval` property set to `4`: this means that inferencing is actually executed only once every 5 frames. Bounding boxes are displayed continuously though because a tracking algorithm, which is computationally less expensive than inferencing, takes over in between. The tracking algorithm used is set in the `tracking` section. This is the kind of out-of-the-box optimizations provided by DeepStream that enables us to process 240 frames per second on a $100 device. Other notable optimizations are using dedicated encoding/decoding hardware, only loading frames in memory once (zero in-memory copy), pushing the vast majority of the processing to GPUs, batching frames from multiple streams, etc.
 
-### Understanding the connection to IoT Central
+### Setting up the the connection to IoT Central
 
 IoT Edge connects to IoT Central with the regular Module SDK (you can look at the [source code here](https://github.com/ebertrams/iotedge-iva-nano/blob/master/modules/IoTCentralBridge/src/services/iotCentral.ts)). Telemetry, Properties and Commands that the IoT Edge Central bridge module receives/sends follow [IoT Plug and Play](https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play) aka PnP format, which is enforced in the Cloud by IoT Central. IoT Central enforces them against a Device Capability Model (DCM), which is a file that defines what this IoT Edge device is capable of doing.
 
@@ -96,7 +96,7 @@ IoT Edge connects to IoT Central with the regular Module SDK (you can look at th
 
 Enough documentation! Let's now see the solution built by our partner in action.
 
-## Operating the solution with IoT Central app
+## Setting up the solution
 
 Let's start by creating a new IoT Central app to remotely control the Jetson Nano.
 
@@ -218,7 +218,7 @@ At this point, you should see 4 real-time video streams being processed to detec
 
 ![4 video streams processed real-time](./assets/4VideosProcessedRTSP.png "8 video streams processed in real-time by a Jetson Nano with Deepstream and IoT Edge")
 
-## Operating the solution
+## Operating the solution with IoT Central
 
  To demonstrate how to remotely manage this solution, we'll send a command to the device to change its input cameras. We'll use your phone as an RTSP camera as a new input camera.
 
@@ -261,7 +261,7 @@ You should now detect people from one of the room's camera. The count of `Person
 
 We've just remotely updated the configuration of this intelligent video analytics solution!
 
-## Use an AI model to detect custom visual anomalies
+## Use a custom AI model to detect visual anomalies
 
 We'll use simulated cameras to monitor each of the soda cans production lines and we'll collect images and build a custom AI model to detects cans that are up or down. We'll then deploy this custom AI model to DeepStream via IoT Central. To do a quick Proof Of Concept, we'll use the [Custom Vision service](https://www.customvision.ai/), a no-code computer vision AI model builder.
 
