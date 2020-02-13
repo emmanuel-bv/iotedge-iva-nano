@@ -347,6 +347,24 @@ With IoT Central, you can easily define rules and alerts based on the telemetry 
 
 In a few seconds, you should be receiving some mails :)
 
+## Clean-up
+
+This is the end of the workshop. Because there will be another session that uses the same device and azure account after you, please clean up the resources you've installed to let others start fresh:
+
+- **Clean up on the Jetson Nano**, via your SSH terminal:
+
+    ```bash
+    sudo apt-get remove --purge iotedge
+    sudo rm -r /data
+    ```
+
+- **Deleting your IoT Central application**, from your browser:
+    - Go to your IoT Central application
+    - Click on the `Administration` tab from the left nav
+    - Click on `Delete` the application and confirm
+
 ## Going further
 
-Thank you for attending this workshop! There are other content that you can try with your Jetson Nano at [http://aka.ms/jetson-on-azure](http://aka.ms/jetson-on-azure)!
+Thank you for attending this workshop! We hope that you enjoyed it and found it valuable.
+
+There are other content that you can try with your Jetson Nano at [http://aka.ms/jetson-on-azure](http://aka.ms/jetson-on-azure)!
