@@ -31,7 +31,6 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
         ssh dlinano@your-ip-address
         ```
 
-- **Install IoT Edge**: See the [Azure IoT Edge installation instructions](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) for Ubuntu Server 18.04. Skip the Install Container Runtime section since we will be using nvidia-docker, which is already installed. Connect your device to your IoT Hub using the manual provisioning option. See this [quickstart](https://docs.microsoft.com/en-us/azure/iot-edge/quickstart-linux) if you don't yet have an Azure IoT Hub.
 - **Install VLC to view RTSP video streams**: On your developer's machine, [install VLC](https://www.videolan.org/vlc/index.html).
 
 The next sections walks you step-by-step to deploy Deepstream on an IoT Edge device, update its configuration via a pre-built IoT Central application and build a custom AI model with Custom Vision. It explains concepts along the way.
