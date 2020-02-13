@@ -205,7 +205,7 @@ After a few moments the Edge runtime restarts and establishes a connection with 
 4. Click on its `Device` tab
 5. Verify that the `RTSP Video URL` starts with the IP address of your device
 
-After a minute or so, DeepStream should have had enough time to star the default video pipeline, called `Demo mode` in IoT Central UI. Let's see how it looks like:
+After a minute or so, DeepStream should have had enough time to start the default video pipeline, called `Demo mode` in IoT Central UI. Let's see how it looks like:
 
 1. In IoT Central, copy the `RTSP Video URL` from the `Device` tab
 2. Open VLC and go to `Media` > `Open Network Stream` and paste the `RTSP Video URL` copied above as the network URL and click `Play`
@@ -224,25 +224,13 @@ At this point, you should see 4 real-time video streams being processed to detec
 
 ### Changing input cameras
 
-Let's first verify that your phone works as an RTSP camera properly:
-
-- Open the the IP Camera Lite
-- Go to Settings and remove the User and Password on the RTSP feed
-- Click on `Turn on IP Camera Server`
-
-Let's just verify that the camera is functional. With VLC:
-
-- Go to `Media` > `Open Network Stream`
-- Paste the following `RTSP Video URL`:  `rtsp://your-phone-ip-address:8554/live`
-- Click `Play` and verify that phone's camera is properly displaying.
-
-Let's now update your Jetson Nano to use your phone's camera. In IoT Central:
+Some RTSP cameras have been setup in the room. We'll send instructions to our Jetson Nano via IoT Central to connect to these live cameras and count the number of people in the room.
 
 - Go to the `Manage` tab
 - Unselect the `Demo Mode`, which uses several hardcoded video files as input of car traffic
 - Update the `Video Stream 1` property:
-    - In the `cameraId`, name your camera, for instance `My Phone`
-    - In the `videoStreamUrl`, enter the RTSP stream of this camera: `rtsp://your-phone-ip-address:8554/live`
+    - In the `cameraId`, name your camera, for instance `Room 01`
+    - In the `videoStreamUrl`, enter the RTSP stream of this camera: `rtsp://room-camera-ip-address:8554/live`
 - Keep the default AI model of DeepStream by keeping the value `DeepStream ResNet 10` as the `AI model type`.
 - Keep the default `Secondary Detection Class` as `person`
 - Hit `Save`
@@ -267,7 +255,9 @@ Let's have a closer look at DeepStream configuration to see what has changed. Fr
 
 Within a minute, DeepStream should restart. You can observe its status in IoT Central via the `Modules` tab. Once `deepstream` module is back to `Running`, copy again the `RTSP Video Url` field from the `Device` tab and give it to VLC (`Media` > `Open Network Stream` > paste the `RTSP Video URL` > `Play`).
 
-You should now detect people from your phone's camera. The count of `Person` in the `dashboard` tab in IoT Central should go up. We've just remotely updated the configuration of this intelligent video analytics solution!
+You should now detect people from one of the room's camera. The count of `Person`, aka `Secondary Detection` in the `dashboard` tab in IoT Central should go up.
+
+We've just remotely updated the configuration of this intelligent video analytics solution!
 
 ## Use an AI model to detect custom visual anomalies
 

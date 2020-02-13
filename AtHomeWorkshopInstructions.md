@@ -231,7 +231,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
 As you can guess from this last step, behind the scenes IoT Central is actually using [Azure Device Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/about-iot-dps) to provision devices at scale.
 
-After a few moments the Edge runtime restarts and establishes a connection with your IoT Central application. The device should for instance, immediately report back its IP address to IoT Central. Let's verify that it is the case:
+After a couple of minutes the Edge runtime restarts and establishes a connection with your IoT Central application. It may take a while the first time since IoT Edge needs to download ~1.5Gb of IoT Edge modules. The device should for instance, immediately report back its IP address to IoT Central. Let's verify that it is the case:
 
 1. Go to your IoT Central application
 2. Go to `Devices` tab from the left navigation
