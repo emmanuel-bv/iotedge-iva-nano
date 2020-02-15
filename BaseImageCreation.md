@@ -25,30 +25,58 @@ nano ./install.sh
 ./install.sh
 ```
 
-7. Remove the SD card from your Jetson Nano
-8. Insert the SD card into a Linux host computer
-9. Print the partition table to read sectors with `fdisk` (assuming that sdb maps to yoru SD Card)
+7. To pre-cache container images, download the following images:
+
+```bash
+sudo docker pull mcr.microsoft.com/azureiotedge-agent:1.0
+sudo docker pull mcr.microsoft.com/azureiotedge-hub:1.0
+sudo docker pull marketplace.azurecr.io/nvidia/deepstream-iot2-l4t:latest
+sudo docker pull ebertrams/iotcentralbridge:0.1.0-arm64v8
+```
+
+8. Set docker to rotate the logs:
+
+    - Edit this docker configuration
+
+    ```bash
+    sudo nano /etc/docker/daemon.json
+    ```
+
+    - Add the following lines:
+
+    ```json
+    {
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "10m",
+        "max-file": "5"
+        }
+    }
+    ```
+
+8. Remove the SD card from your Jetson Nano
+9. Insert the SD card into a Linux host computer
+10. Print the partition table to read sectors with `fdisk` (assuming that sdb maps to yoru SD Card)
 
 ```bash
 sudo fdisk /dev/sdb
-p
 ```
 
-10. Not the end sector of the end parition
-11. Add 1
-12. Divide by 2048 to convert to megabytes
-13. Round up to the nearest whole number to get the last block to copy on the SD card
+11. Not the end sector of the end parition
+12. Add 1
+13. Divide by 2048 to convert to megabytes
+14. Round up to the nearest whole number to get the last block to copy on the SD card
 
-1. Create an image out of the SD card (without the unused space):
+15. Create an image out of the SD card (without the unused space):
 
 ```
 sudo dd bs=1M if=/dev/sdb of=jetpack_4.3_usb_mode.img status=progress count=<your block count>
 ```
 
-15. Compress your image
+16. Compress your image
 
 ```
 zip jetpack_4.3_usb_mode_img.zip jetpack_4.3_usb_mode.img
 ```
 
-16. Flash your next SD card with this image using [BalenaEtcher](https://www.balena.io/etcher/)
+17. Flash your next SD card with this image using [BalenaEtcher](https://www.balena.io/etcher/)
