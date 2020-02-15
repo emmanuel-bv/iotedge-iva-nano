@@ -65,21 +65,7 @@ Here is an example of what an end-to-end DeepStream pipeline looks like:
 
 You can learn more about its architecture in [NVIDIA's official documentation](https://docs.nvidia.com/metropolis/deepstream/dev-guide/index.html#page/DeepStream_Development_Guide%2Fdeepstream_app_architecture.html).
 
-To better understand how NVIDIA DeepStream works, let's have a look at its configuration file.
-
-From your favourite SSH client:
-
-1. Open an SSH connection with the IP address found above. Username is `dlinano` and so is the default password.
-
-    ```bash
-    ssh dlinano@YOUR_IP_ADDRESS
-    ```
-
-2. Open up the default configuration file of DeepStream to understand its structure:
-
-    ```bash
-    nano /data/misc/storage/DSconfig.txt
-    ```
+To better understand how NVIDIA DeepStream works, let's have a look at its [default configuration file copied here in this repo](DemoModeDeepStreamConfiguration.txt) (called `Demo Mode` in IoT Central UI later on).
 
 Observe in particular:
 
@@ -241,7 +227,7 @@ Some RTSP cameras have been setup in the room. We'll send instructions to our Je
 
 This sends a command to the device to update its DeepStream configuration file with these new properties and to restart DeepStream. If you were still streaming the output of the DeepStream application, this stream will be taken down as DeepStream will restart.
 
-Let's have a closer look at DeepStream configuration to see what has changed. From your SSH client:
+Let's have a closer look at DeepStream configuration to see what has changed compared to the initial `Demo Mode` configuration which is copied [here](DemoModeDeepStreamConfiguration.txt). From your SSH client:
 
 1. Open an SSH connection with your Jetson Nano IP address. Username is `dlinano` and so is the default password.
 
