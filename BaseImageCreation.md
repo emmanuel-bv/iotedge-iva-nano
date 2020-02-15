@@ -42,7 +42,7 @@ sudo docker pull ebertrams/iotcentralbridge:0.1.0-arm64v8
     sudo nano /etc/docker/daemon.json
     ```
 
-    - Add the following lines:
+    - Add the following key-values:
 
     ```json
     {
@@ -54,6 +54,13 @@ sudo docker pull ebertrams/iotcentralbridge:0.1.0-arm64v8
     }
     ```
 
+    - Verify that docker is still running properly after this config change:
+
+    ```bash
+    sudo systemctl restart docker
+    sudo systemctl status docker
+    ```
+
 8. Remove the SD card from your Jetson Nano
 9. Insert the SD card into a Linux host computer
 10. Print the partition table to read sectors with `fdisk` (assuming that sdb maps to yoru SD Card)
@@ -62,7 +69,7 @@ sudo docker pull ebertrams/iotcentralbridge:0.1.0-arm64v8
 sudo fdisk /dev/sdb
 ```
 
-11. Not the end sector of the end parition
+11. Note the end sector of the end parition
 12. Add 1
 13. Divide by 2048 to convert to megabytes
 14. Round up to the nearest whole number to get the last block to copy on the SD card

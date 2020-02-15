@@ -123,7 +123,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
     ```bash
     cd /data
-    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?cid=0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588477&authkey=AIWlT_q7sPbcfS4"
+    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?cid=0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588528&authkey=ALyYnqySyxh3dBQ"
     sudo tar -xjvf setup.tar.bz2
     ```
 
