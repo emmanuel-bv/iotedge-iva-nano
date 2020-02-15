@@ -177,17 +177,19 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
     - Uncomment the "DPS symmetric key provisioning configuration" and add your IoT Central app's scope id, registration_id which is your device Id and its primary symmetric key:
 
-        ```bash
-        # DPS symmetric key provisioning configuration
-        provisioning:
+    > :warning: Beware of spaces since YAML is space sensitive. In YAML exactly 2 spaces = 1 identation and make sure to not have any trailing spaces.
+
+    ```bash
+    # DPS symmetric key provisioning configuration
+    provisioning:
         source: "dps"
         global_endpoint: "https://global.azure-devices-provisioning.net"
         scope_id: "<ID Scope>"
         attestation:
-            method: "symmetric_key"
-            registration_id: "<Device ID>"
-            symmetric_key: "<Primary Key>"
-        ```
+        method: "symmetric_key"
+        registration_id: "<Device ID>"
+        symmetric_key: "<Primary Key>"
+    ```
 
     - Save and exit your editor (Ctrl+O, Ctrl+X)
 
