@@ -27,9 +27,7 @@ head -n 1 /etc/nv_tegra_release
 
 ![Jupyter Notebook](./assets/JupyterNotebook.png "Jetson Nano controlled by a Jupyter Notebook via the USB Device Mode")
 
-- **Connect your Jetson Nano to the internet**: Either use an ethernet connection, in which case you can skip this section or connect your device to WiFi using the above USB Device Mode terminal:
-
-    To connect your Jetson to a WiFi network from a terminal, follow these steps
+- **Connect your Jetson Nano to the internet**: Either use an ethernet connection, in which case you can skip this section or *if your device supports WiFi* (which is not out-of-the-box for standard dev kits) connect it to WiFi with the following commands from the USB Device Mode terminal:
 
     1. Re-scan available WiFi networks
 
