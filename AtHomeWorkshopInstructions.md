@@ -15,7 +15,7 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
 
 ![Jetson Nano](./assets/JetsonNano.png "NVIDIA Jetson Nano device used to run Deepstream with IoT Edge")
 
-- **Flash your Jetson Nano SD Card**: download and flash either this [JetPack version 4.3 image](https://developer.nvidia.com/embedded/jetpack) if you have an HDMI screen or the [image from this NVIDIA course](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info) otherwise. The image from the course is also based on JetPack 4.3 but includes an USB Device Mode to use the Jetson Nano without HDMI screen. For the rest of this tutorial will assume that you use the device in USB Device Mode. In any cases, you can use [BalenaEtcher](https://www.balena.io/etcher/) tool to flash your SD card. Both of these images are based on Ubuntu 18.04 and already includes NVIDIA drivers version, CUDA and Nvidia-Docker. To double check your JetPack version, you can use the following command (JetPack 4.3 = Release 32, Revision 3):
+- **Flash your Jetson Nano SD Card**: download and flash either this [JetPack version 4.3 image](https://developer.nvidia.com/embedded/jetpack) if you have an HDMI screen or the [image from this NVIDIA course](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info) otherwise (which is a great learning resource anyway!). The image from the course is also based on JetPack 4.3 but includes an USB Device Mode to use the Jetson Nano without HDMI screen. For the rest of this tutorial will assume that you use the device in USB Device Mode. In any cases, you can use [BalenaEtcher](https://www.balena.io/etcher/) tool to flash your SD card. Both of these images are based on Ubuntu 18.04 and already includes NVIDIA drivers version, CUDA and Nvidia-Docker. To double check your JetPack version, you can use the following command (JetPack 4.3 = Release 32, Revision 3):
 
 ```bash
 head -n 1 /etc/nv_tegra_release
@@ -23,13 +23,11 @@ head -n 1 /etc/nv_tegra_release
 
 - **A developer's machine**: You need a developer's machine (Windows, Linux or Mac) to connect to your Jetson Nano device and see its results with a browser and an ssh client.
 
-- **Connect your Jetson Nano to your developer's machine with the USB Device Mode**: we'll do that by plugging a micro-USB cable from your Jetson Nano to your developer's machine and using the USB Device Mode provided in [NVIDIA's course base image](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info). With this mode, you do not need to hook up a monitor directly to your Jetson Nano. Instead, boot your device and wait for 30 seconds then open your favorite browser, go to [http://192.168.55.1:8888](http://192.168.55.1:8888) and enter the password `dlinano` to get access to a command line on your Jetson Nano.
+- **A USB cable MicroB to Type A to connect your Jetson Nano to your developer's machine with the USB Device Mode**: we'll use the USB Device Mode provided in [NVIDIA's course base image](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info). With this mode, you do not need to hook up a monitor directly to your Jetson Nano. Instead, boot your device and wait for 30 seconds then open your favorite browser, go to [http://192.168.55.1:8888](http://192.168.55.1:8888) and enter the password `dlinano` to get access to a command line on your Jetson Nano.
 
 ![Jupyter Notebook](./assets/JupyterNotebook.png "Jetson Nano controlled by a Jupyter Notebook via the USB Device Mode")
 
-- **Connect your Jetson Nano to the internet**: Either use an ethernet connection, in which case you can skip this section or connect your device to WiFi using the above USB Device Mode terminal:
-
-    To connect your Jetson to a WiFi network from a terminal, follow these steps
+- **Connect your Jetson Nano to the internet**: Either use an ethernet connection, in which case you can skip this section or *if your device supports WiFi* (which is not out-of-the-box for standard dev kits) connect it to WiFi with the following commands from the USB Device Mode terminal:
 
     1. Re-scan available WiFi networks
 
@@ -49,7 +47,7 @@ head -n 1 /etc/nv_tegra_release
         nmcli device wifi connect <ssid_name> password <password>
         ```
 
-- **Connect your Jetson Nano to an SSH client**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client.
+- **An SSH client to connect your Jetson Nano**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client.
 
     1. Find your IP address using the USB Device Mode terminal
 
@@ -63,9 +61,11 @@ head -n 1 /etc/nv_tegra_release
         ssh dlinano@your-ip-address
         ```
 
-- **VLCi on your developer's machine**: To visualize the output of the Jetson Nano without HDMI screen (there is only one per table), we'll use VLC from your laptop to view a RTSP video stream of the processed videos. [Install VLC](https://www.videolan.org/vlc/index.html) if you dont have it yet.
+- **VLC to view RTSP video streams**: To visualize the output of the Jetson Nano without HDMI screen (there is only one per table), we'll use VLC from your laptop to view a RTSP video stream of the processed videos. [Install VLC](https://www.videolan.org/vlc/index.html) if you dont have it yet.
+
 - **An Azure subscription**: You need an Azure subscription to create an Azure IoT Central  application.
-- **A phone with IP Camera Lite app**: To view & process a live video stream, you can use your phone with the IP Camera Lite app ([iOS](https://apps.apple.com/us/app/ip-camera-lite/id1013455241), [Android](https://play.google.com/store/apps/details?id=com.shenyaocn.android.WebCam&hl=en_US)) as an IP camera.
+
+ **A phone with IP Camera Lite app**: To view & process a live video stream, you can use your phone with the IP Camera Lite app ([iOS](https://apps.apple.com/us/app/ip-camera-lite/id1013455241), [Android](https://play.google.com/store/apps/details?id=com.shenyaocn.android.WebCam&hl=en_US)) as an IP camera.
 
 The next sections walks you step-by-step to deploy Deepstream on an IoT Edge device, update its configuration via a pre-built IoT Central application and build a custom AI model with Custom Vision. It explains concepts along the way.
 
@@ -97,21 +97,7 @@ Here is an example of what an end-to-end DeepStream pipeline looks like:
 
 You can learn more about its architecture in [NVIDIA's official documentation](https://docs.nvidia.com/metropolis/deepstream/dev-guide/index.html#page/DeepStream_Development_Guide%2Fdeepstream_app_architecture.html).
 
-To better understand how NVIDIA DeepStream works, let's have a look at its configuration file.
-
-From your favourite SSH client:
-
-1. Open an SSH connection with the IP address found above. Username is `dlinano` and so is the default password.
-
-    ```bash
-    ssh dlinano@YOUR_IP_ADDRESS
-    ```
-
-2. Open up the default configuration file of DeepStream to understand its structure:
-
-    ```bash
-    nano /data/misc/storage/DSconfig.txt
-    ```
+To better understand how NVIDIA DeepStream works, let's have a look at its [default configuration file copied here in this repo](DemoModeDeepStreamConfiguration.txt) (called `Demo Mode` in IoT Central UI later on).
 
 Observe in particular:
 
@@ -169,7 +155,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
     ```bash
     cd /data
-    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?cid=0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588477&authkey=AIWlT_q7sPbcfS4"
+    sudo wget -O setup.tar.bz2 --no-check-certificate "https://onedrive.live.com/download?cid=0C0A4A69A0CDCB4C&resid=0C0A4A69A0CDCB4C%21588528&authkey=ALyYnqySyxh3dBQ"
     sudo tar -xjvf setup.tar.bz2
     ```
 
@@ -209,17 +195,19 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
 
     - Uncomment the "DPS symmetric key provisioning configuration" and add your IoT Central app's scope id, registration_id which is your device Id and its primary symmetric key:
 
-        ```bash
-        # DPS symmetric key provisioning configuration
-        provisioning:
+    > :warning: Beware of spaces since YAML is space sensitive. In YAML exactly 2 spaces = 1 identation and make sure to not have any trailing spaces.
+
+    ```bash
+    # DPS symmetric key provisioning configuration
+    provisioning:
         source: "dps"
         global_endpoint: "https://global.azure-devices-provisioning.net"
         scope_id: "<ID Scope>"
         attestation:
-            method: "symmetric_key"
-            registration_id: "<Device ID>"
-            symmetric_key: "<Primary Key>"
-        ```
+        method: "symmetric_key"
+        registration_id: "<Device ID>"
+        symmetric_key: "<Primary Key>"
+    ```
 
     - Save and exit your editor (Ctrl+O, Ctrl+X)
 
@@ -243,7 +231,7 @@ After a minute or so, DeepStream should have had enough time to star the default
 
 1. In IoT Central, copy the `RTSP Video URL` from the `Device` tab
 2. Open VLC and go to `Media` > `Open Network Stream` and paste the `RTSP Video URL` copied above as the network URL and click `Play`
-3. In IoT Central, go to to the `Dashboard` tab
+3. In IoT Central, go to to the `Dashboard` tab *of your device* (e.g. from the left nav: `Devices` > `your-device` > `Dashboard`)
 4. Verify that active telemetry is being sent by the device to IoT Central. In particular, the number of primary detections which are set to `car` by default should map to the objects detected by the 4 cameras.
 
 At this point, you should see 4 real-time video streams being processed to detect cars and people with a Resnet 10 AI model.
@@ -283,7 +271,7 @@ Let's now update your Jetson Nano to use your phone's camera. In IoT Central:
 
 This sends a command to the device to update its DeepStream configuration file with these new properties and to restart DeepStream. If you were still streaming the output of the DeepStream application, this stream will be taken down as DeepStream will restart.
 
-Let's have a closer look at DeepStream configuration to see what has changed. From your SSH client:
+Let's have a closer look at DeepStream configuration to see what has changed compared to the initial `Demo Mode` configuration which is copied [here](DemoModeDeepStreamConfiguration.txt). From your SSH client:
 
 1. Open an SSH connection with your Jetson Nano IP address. Username is `dlinano` and so is the default password.
 
@@ -301,7 +289,7 @@ Let's have a closer look at DeepStream configuration to see what has changed. Fr
 
 Within a minute, DeepStream should restart. You can observe its status in IoT Central via the `Modules` tab. Once `deepstream` module is back to `Running`, copy again the `RTSP Video Url` field from the `Device` tab and give it to VLC (`Media` > `Open Network Stream` > paste the `RTSP Video URL` > `Play`).
 
-You should now detect people from your phone's camera. The count of `Person` in the `dashboard` tab in IoT Central should go up. We've just remotely updated the configuration of this intelligent video analytics solution!
+You should now detect people from your phone's camera. The count of `Person` in the `dashboard` tab *of your device* in IoT Central should go up. We've just remotely updated the configuration of this intelligent video analytics solution!
 
 ## Use an AI model to detect custom visual anomalies
 
