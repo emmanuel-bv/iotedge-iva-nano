@@ -233,7 +233,7 @@ After a minute or so, DeepStream should have had enough time to star the default
 
 1. In IoT Central, copy the `RTSP Video URL` from the `Device` tab
 2. Open VLC and go to `Media` > `Open Network Stream` and paste the `RTSP Video URL` copied above as the network URL and click `Play`
-3. In IoT Central, go to to the `Dashboard` tab
+3. In IoT Central, go to to the `Dashboard` tab *of your device* (e.g. from the left nav: `Devices` > `your-device` > `Dashboard`)
 4. Verify that active telemetry is being sent by the device to IoT Central. In particular, the number of primary detections which are set to `car` by default should map to the objects detected by the 4 cameras.
 
 At this point, you should see 4 real-time video streams being processed to detect cars and people with a Resnet 10 AI model.
@@ -291,7 +291,7 @@ Let's have a closer look at DeepStream configuration to see what has changed com
 
 Within a minute, DeepStream should restart. You can observe its status in IoT Central via the `Modules` tab. Once `deepstream` module is back to `Running`, copy again the `RTSP Video Url` field from the `Device` tab and give it to VLC (`Media` > `Open Network Stream` > paste the `RTSP Video URL` > `Play`).
 
-You should now detect people from your phone's camera. The count of `Person` in the `dashboard` tab in IoT Central should go up. We've just remotely updated the configuration of this intelligent video analytics solution!
+You should now detect people from your phone's camera. The count of `Person` in the `dashboard` tab *of your device* in IoT Central should go up. We've just remotely updated the configuration of this intelligent video analytics solution!
 
 ## Use an AI model to detect custom visual anomalies
 
