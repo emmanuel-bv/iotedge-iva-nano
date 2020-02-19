@@ -19,7 +19,7 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
 
 ![Jupyter Notebook](./assets/JupyterNotebook.png "Jetson Nano controlled by a Jupyter Notebook via the USB Device Mode")
 
-- **An SSH client to connect your Jetson Nano**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client.
+- **An SSH client to connect your Jetson Nano**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client, such as Command Prompt.
 
     1. Find your IP address using the USB Device Mode terminal
 
@@ -27,7 +27,7 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
         ifconfig
         ```
 
-    2. Make sure that your laptop is on the same network as yoru Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
+    2. Make sure that your laptop is on the same network as your Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
 
         ```bash
         ssh dlinano@your-ip-address
