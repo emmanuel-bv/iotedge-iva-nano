@@ -238,7 +238,7 @@ Let's have a closer look at DeepStream configuration to see what has changed com
 2. Open up the default configuration file of DeepStream to understand its structure:
 
     ```bash
-    nano /data/misc/storage/DSconfig.txt
+    nano /data/misc/storage/DSConfig.txt
     ```
 
 3. Look after the first `source` and observe how parameteres provided in IoT Central UI got copied here.
