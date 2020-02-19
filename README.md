@@ -24,7 +24,7 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
     1. Find your IP address using the USB Device Mode terminal (your ip address is the "inet" one):
 
         ```bash
-        ifconfig | grep "inet" | head -n 1
+        /sbin/ifconfig eth0 | grep "inet" | head -n 1
         ```
 
     2. Make sure that your laptop is on the same network as your Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
