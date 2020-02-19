@@ -166,7 +166,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
     #  device_connection_string: ""
     ```
 
-    - Uncomment the "DPS symmetric key provisioning configuration" and add your IoT Central app's scope id, registration_id which is your device Id and its primary symmetric key:
+    - Uncomment the "DPS symmetric key provisioning configuration" (*not the TPM section but the symmetric key one*) and add your IoT Central app's scope id, registration_id which is your device Id and its primary symmetric key:
 
     > :warning: Beware of spaces since YAML is space sensitive. In YAML exactly 2 spaces = 1 identation and make sure to not have any trailing spaces.
 
