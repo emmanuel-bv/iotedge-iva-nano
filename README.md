@@ -21,10 +21,10 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
 
 - **An SSH client to connect your Jetson Nano**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client, such as Command Prompt.
 
-    1. Find your IP address using the USB Device Mode terminal
+    1. Find your IP address using the USB Device Mode terminal (your ip address is the "inet" one):
 
         ```bash
-        ifconfig
+        ifconfig | grep "inet" | head -n 1
         ```
 
     2. Make sure that your laptop is on the same network as your Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
@@ -176,7 +176,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
         source: "dps"
         global_endpoint: "https://global.azure-devices-provisioning.net"
         scope_id: "<ID Scope>"
-          attestation:
+        attestation:
           method: "symmetric_key"
           registration_id: "<Device ID>"
           symmetric_key: "<Primary Key>"
@@ -339,8 +339,8 @@ This is the end of the workshop. Because there will be another session that uses
 - **Clean up on the Jetson Nano**, via your SSH terminal:
 
     ```bash
-    sudo apt-get remove --purge iotedge
     sudo rm -r /data
+    sudo apt-get remove --purge -y iotedge
     ```
 
 - **Deleting your IoT Central application**, from your browser:

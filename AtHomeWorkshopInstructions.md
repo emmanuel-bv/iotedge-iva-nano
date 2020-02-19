@@ -49,10 +49,10 @@ head -n 1 /etc/nv_tegra_release
 
 - **An SSH client to connect your Jetson Nano**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client.
 
-    1. Find your IP address using the USB Device Mode terminal
+    1. Find your IP address using the USB Device Mode terminal (your IP address is the "inet" one):
 
         ```bash
-        ifconfig
+        ifconfig | grep "inet" | head -n 1
         ```
 
     2. Make sure that your laptop is on the same network as yoru Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
@@ -376,8 +376,8 @@ This is the end of the workshop. Because there will be another session that uses
 - **Clean up on the Jetson Nano**, via your SSH terminal:
 
     ```bash
-    sudo apt-get remove --purge iotedge
     sudo rm -r /data
+    sudo apt-get remove --purge -y iotedge
     ```
 
 - **Deleting your IoT Central application**, from your browser:
