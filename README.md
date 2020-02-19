@@ -24,7 +24,7 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
     1. Find your IP address using the USB Device Mode terminal (your ip address is the "inet" one):
 
         ```bash
-        ifconfig | grep "inet" | head -n 1
+        /sbin/ifconfig eth0 | grep "inet" | head -n 1
         ```
 
     2. Make sure that your laptop is on the same network as your Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
@@ -213,7 +213,7 @@ At this point, you should see 4 real-time video streams being processed to detec
 
 ## Operating the solution with IoT Central
 
- To demonstrate how to remotely manage this solution, we'll send a command to the device to change its input cameras. We'll use your phone as an RTSP camera as a new input camera.
+ To demonstrate how to remotely manage this solution, we'll send a command to the device to change its input cameras. We'll use your live RTSP cameras from the room as a new input camera.
 
 ![IoT Central](./assets/IoTCentral.png "IoT Central UI to remotely manage NVIDIA Jetson devices")
 
