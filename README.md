@@ -57,7 +57,7 @@ It formats all telemetry, properties, and commands using [IoT Plug and Play](htt
 
 ### Understanding NVIDIA DeepStream
 
-Deesptream is a SDK based on GStreamer, an open source, battle-tested platform to create video pipelines. It is very modular with its concepts of plugins. Each plugins have `sinks` and `sources`. NVIDIA provides several plugins as part of Deepstream which are optimized to leverage NVIDIA's GPUs or other NVIDIA hardware like dedicated encoding/decoding chips. How these plugins are connected with each others is defined in the application's configuration file.
+DeepStream is a SDK based on GStreamer, an open source, battle-tested platform to create video pipelines. It is very modular with its concepts of plugins. Each plugins have `sinks` and `sources`. NVIDIA provides several plugins as part of Deepstream which are optimized to leverage NVIDIA's GPUs or other NVIDIA hardware like dedicated encoding/decoding chips. How these plugins are connected with each others is defined in the application's configuration file.
 
 Here is an example of what an end-to-end DeepStream pipeline looks like:
 
