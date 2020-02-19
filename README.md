@@ -339,8 +339,8 @@ This is the end of the workshop. Because there will be another session that uses
 - **Clean up on the Jetson Nano**, via your SSH terminal:
 
     ```bash
-    sudo apt-get remove --purge iotedge
     sudo rm -r /data
+    sudo apt-get remove --purge -y iotedge
     ```
 
 - **Deleting your IoT Central application**, from your browser:
