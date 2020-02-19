@@ -176,7 +176,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
         source: "dps"
         global_endpoint: "https://global.azure-devices-provisioning.net"
         scope_id: "<ID Scope>"
-          attestation:
+        attestation:
           method: "symmetric_key"
           registration_id: "<Device ID>"
           symmetric_key: "<Primary Key>"
