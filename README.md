@@ -21,10 +21,10 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
 
 - **An SSH client to connect your Jetson Nano**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client, such as Command Prompt.
 
-    1. Find your IP address using the USB Device Mode terminal
+    1. Find your IP address using the USB Device Mode terminal (your ip address is the "inet" one):
 
         ```bash
-        ifconfig
+        ifconfig | grep "inet" | head -n 1
         ```
 
     2. Make sure that your laptop is on the same network as your Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
