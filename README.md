@@ -19,7 +19,7 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
 
 ![Jupyter Notebook](./assets/JupyterNotebook.png "Jetson Nano controlled by a Jupyter Notebook via the USB Device Mode")
 
-- **An SSH client to connect your Jetson Nano**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client.
+- **An SSH client to connect your Jetson Nano**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client, such as Command Prompt.
 
     1. Find your IP address using the USB Device Mode terminal
 
@@ -27,7 +27,7 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
         ifconfig
         ```
 
-    2. Make sure that your laptop is on the same network as yoru Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
+    2. Make sure that your laptop is on the same network as your Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
 
         ```bash
         ssh dlinano@your-ip-address
@@ -91,9 +91,14 @@ Let's start by creating a new IoT Central app to remotely control the Jetson Nan
 We'll start from a pre-built template of IoT Central, which already includes a the pre-built Device Capability Model and IoT Edge deployment manigest mentionned above for our video analytics solution running on the NVIDIA Jetson Nano.
 
 - From your browser, go to: https://apps.azureiotcentral.com/build/new/af1fe1b4-d92e-45fc-9d1f-ea4decdc961d
+- Login with the following credentials:
+    - Username: `lab01_userXX@iotsummit.xyz` where XX = your Jetson Nano number, for instance `01`.
+    - Password: Use the one given in the room
 - Give a name and URL to your application
-- Select your Azure subscription (you can opt-in for a 7 day free trial)
-- Select your location
+- Select `Standard 2` Pricing plan.
+- Change the directory to be `Microsoft (microsoft.onmicrosoft.com)`
+- Select the `IoT_SubscriptionContainer_4` Azure subscription
+- Keep `United States` as your location
 - Click on `Create`
 
 ### Create an IoT Edge device from your IoT Central app
@@ -219,8 +224,8 @@ Some RTSP cameras have been setup in the room. We'll send instructions to our Je
 - Go to the `Manage` tab
 - Unselect the `Demo Mode`, which uses several hardcoded video files as input of car traffic
 - Update the `Video Stream 1` property:
-    - In the `cameraId`, name your camera, for instance `Room 01`
-    - In the `videoStreamUrl`, enter the RTSP stream of this camera: `rtsp://room-camera-ip-address:8554/live`
+    - In the `cameraId`, name your camera, for instance `Room Camera 01`
+    - In the `videoStreamUrl`, enter the RTSP stream of this camera given in the room
 - Keep the default AI model of DeepStream by keeping the value `DeepStream ResNet 10` as the `AI model type`.
 - Keep the default `Secondary Detection Class` as `person`
 - Hit `Save`
@@ -238,7 +243,7 @@ Let's have a closer look at DeepStream configuration to see what has changed com
 2. Open up the default configuration file of DeepStream to understand its structure:
 
     ```bash
-    nano /data/misc/storage/DSconfig.txt
+    nano /data/misc/storage/DSConfig.txt
     ```
 
 3. Look after the first `source` and observe how parameteres provided in IoT Central UI got copied here.
