@@ -166,7 +166,7 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
     #  device_connection_string: ""
     ```
 
-    - Uncomment the "DPS symmetric key provisioning configuration" and add your IoT Central app's scope id, registration_id which is your device Id and its primary symmetric key:
+    - Uncomment the "DPS symmetric key provisioning configuration" (*not the TPM section but the symmetric key one*) and add your IoT Central app's scope id, registration_id which is your device Id and its primary symmetric key:
 
     > :warning: Beware of spaces since YAML is space sensitive. In YAML exactly 2 spaces = 1 identation and make sure to not have any trailing spaces.
 
@@ -190,9 +190,15 @@ We'll start from a blank Jetson installation (Jetpack v4.3), copy a few files lo
     sudo systemctl restart iotedge
     ```
 
+    - And let's verify that the connection to the cloud has been correctly established. If it isn't the case, please check your IoT Edge config file.
+
+    ```bash
+    sudo systemctl status iotedge
+    ```
+
 As you can guess from this last step, behind the scenes IoT Central is actually using [Azure Device Provisioning Service](https://docs.microsoft.com/en-us/azure/iot-dps/about-iot-dps) to provision devices at scale.
 
-After a few moments the Edge runtime restarts and establishes a connection with your IoT Central application. The device should for instance, immediately report back its IP address to IoT Central. Let's verify that it is the case:
+With the IoT Edge device connected to the cloud, it can now report back its IP address to IoT Central. Let's verify that it is the case:
 
 1. Go to your IoT Central application
 2. Go to `Devices` tab from the left navigation
@@ -200,7 +206,7 @@ After a few moments the Edge runtime restarts and establishes a connection with 
 4. Click on its `Device` tab
 5. Verify that the `RTSP Video URL` starts with the IP address of your device
 
-After a minute or so, DeepStream should have had enough time to start the default video pipeline, called `Demo mode` in IoT Central UI. Let's see how it looks like:
+After a minute or so, IoT Edge should have had enough time to download all the containers from the Cloud per IoT Central's instructions and DeepStream should have had enough time to start the default video pipeline, called `Demo mode` in IoT Central UI. Let's see how it looks like:
 
 1. In IoT Central, copy the `RTSP Video URL` from the `Device` tab
 2. Open VLC and go to `Media` > `Open Network Stream` and paste the `RTSP Video URL` copied above as the network URL and click `Play`
