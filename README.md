@@ -203,7 +203,7 @@ After a few moments the Edge runtime restarts and establishes a connection with 
 After a minute or so, DeepStream should have had enough time to start the default video pipeline, called `Demo mode` in IoT Central UI. Let's see how it looks like:
 
 1. In IoT Central, copy the `RTSP Video URL` from the `Device` tab
-2. Open VLC and go to `Media` > `Open Network Stream` and paste the `RTSP Video URL` copied above as the network URL and click `Play`
+2. Open VLC and go to `Media` > `Open Network Stream` and paste this URL `rtsp://192.168.55.1:8554/ds-test` (*not the one found above as it seems to misbehave with the room's network switches) copied above as the network URL and click `Play`
 3. In IoT Central, go to to the `Dashboard` tab *of your device* (e.g. from the left nav: `Devices` > `your-device` > `Dashboard`)
 4. Verify that active telemetry is being sent by the device to IoT Central. In particular, the number of primary detections which are set to `car` by default should map to the objects detected by the 4 cameras.
 
