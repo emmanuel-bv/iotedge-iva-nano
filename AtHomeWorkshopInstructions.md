@@ -21,9 +21,9 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
 head -n 1 /etc/nv_tegra_release
 ```
 
-- **A developer's machine**: You need a developer's machine (Windows, Linux or Mac) to connect to your Jetson Nano device and see its results with a browser and an ssh client.
+- **A developer's machine**: You need a developer's machine (Windows, Linux or Mac) to connect to your Jetson Nano device and see its results with a browser and VLC.
 
-- **A USB cable MicroB to Type A to connect your Jetson Nano to your developer's machine with the USB Device Mode**: we'll use the USB Device Mode provided in [NVIDIA's course base image](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info). With this mode, you do not need to hook up a monitor directly to your Jetson Nano. Instead, boot your device and wait for 30 seconds then open your favorite browser, go to [http://192.168.55.1:8888](http://192.168.55.1:8888) and enter the password `dlinano` to get access to a command line on your Jetson Nano.
+- **A USB cable MicroB to Type A to connect your Jetson Nano to your developer's machine with the USB Device Mode**: we'll use the USB Device Mode provided in [NVIDIA's course base image](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info). With this mode, you do not need to hook up a monitor directly to your Jetson Nano. Instead, boot your device and wait for 30 seconds then open your favorite browser, go to [http://192.168.55.1:8888](http://192.168.55.1:8888) and enter the password `dlinano` to get access to a command line terminal on your Jetson Nano. You can use this terminal to run instructions on your Jetson Nano (Ctrl+V is a handy shortcut to paste instructions) or your favorite SSH client if you prefer (`ssh dlinano@your-nano-ip-address` where password=`dlinano` and your nano ip address can be found with the command `/sbin/ifconfig eth0 | grep "inet" | head -n 1`)
 
 ![Jupyter Notebook](./assets/JupyterNotebook.png "Jetson Nano controlled by a Jupyter Notebook via the USB Device Mode")
 
@@ -45,20 +45,6 @@ head -n 1 /etc/nv_tegra_release
 
         ```bash
         nmcli device wifi connect <ssid_name> password <password>
-        ```
-
-- **An SSH client to connect your Jetson Nano**: The USB Device Mode terminal is limited because it does not support copy/paste. So to make it easier to go through the steps of this sample, open an SSH connection with your favorite SSH Client.
-
-    1. Find your IP address using the USB Device Mode terminal (your IP address is the "inet" one):
-
-        ```bash
-        /sbin/ifconfig eth0 | grep "inet" | head -n 1
-        ```
-
-    2. Make sure that your laptop is on the same network as yoru Jetson Nano device and open an SSH connection on your Jetson Device (password = `dlinano`):
-
-        ```bash
-        ssh dlinano@your-ip-address
         ```
 
 - **VLC to view RTSP video streams**: To visualize the output of the Jetson Nano without HDMI screen (there is only one per table), we'll use VLC from your laptop to view a RTSP video stream of the processed videos. [Install VLC](https://www.videolan.org/vlc/index.html) if you dont have it yet.
@@ -277,21 +263,15 @@ Let's now update your Jetson Nano to use your phone's camera. In IoT Central:
 
 This sends a command to the device to update its DeepStream configuration file with these new properties and to restart DeepStream. If you were still streaming the output of the DeepStream application, this stream will be taken down as DeepStream will restart.
 
-Let's have a closer look at DeepStream configuration to see what has changed compared to the initial `Demo Mode` configuration which is copied [here](DemoModeDeepStreamConfiguration.txt). From your SSH client:
+Let's have a closer look at DeepStream configuration to see what has changed compared to the initial `Demo Mode` configuration which is copied [here](DemoModeDeepStreamConfiguration.txt). From a terminal connected to your Jetson Nano:
 
-1. Open an SSH connection with your Jetson Nano IP address. Username is `dlinano` and so is the default password.
-
-    ```bash
-    ssh dlinano@YOUR_IP_ADDRESS
-    ```
-
-2. Open up the default configuration file of DeepStream to understand its structure:
+1. Open up the default configuration file of DeepStream to understand its structure:
 
     ```bash
     nano /data/misc/storage/DSConfig.txt
     ```
 
-3. Look after the first `source` and observe how parameteres provided in IoT Central UI got copied here.
+2. Look after the first `source` and observe how parameteres provided in IoT Central UI got copied here.
 
 Within a minute, DeepStream should restart. You can observe its status in IoT Central via the `Modules` tab. Once `deepstream` module is back to `Running`, copy again the `RTSP Video Url` field from the `Device` tab and give it to VLC (`Media` > `Open Network Stream` > paste the `RTSP Video URL` > `Play`).
 
@@ -379,7 +359,7 @@ In a few seconds, you should be receiving some mails :)
 
 This is the end of the workshop. Because there will be another session that uses the same device and azure account after you, please clean up the resources you've installed to let others start fresh:
 
-- **Clean up on the Jetson Nano**, via your SSH terminal:
+- **Clean up on the Jetson Nano**, via a terminal connected to your Jetson Nano:
 
     ```bash
     sudo rm -r /data
