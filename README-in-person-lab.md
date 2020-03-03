@@ -1,6 +1,6 @@
-# Visual Anomaly Detection over multiple cameras with NVIDIA Jetson Nano devices workshop
+# Azure IoT Edge Workshop: Visual Anomaly Detection over multiple cameras with NVIDIA Jetson Nano devices
 
-These instructions let you reproduce this workshop at home.
+Welcome to this workshop! This set of instructions are for in-person labs. [Click here for the at-home instructions](README.md).
 
 In this workshop, you'll discover how to build a solution that can process several real-time video streams with an AI model on a $100 device, how to build your own AI model to detect custom anomalies and finally how to operate it remotely.
 
@@ -11,47 +11,17 @@ We'll build our own AI model with [Azure Custom Vision](https://www.customvision
 
 ## Prerequisites
 
+- **Have an Azure account with an Azure Subscription**: Accounts will be provided during the lab. Please use them to go through this lab.
+
 - **Hardware**: You need a [NVIDIA Jetson Nano device](https://developer.nvidia.com/embedded/buy/jetson-nano-devkit) with a [5V-4A barrel jack power supply like this one](https://www.adafruit.com/product/1466), which requires a jumper cable (such as [these ones](https://www.amazon.com/120pcs-Multicolor-Jumper-Arduino-Raspberry/dp/B01BAXKDN4/ref=asc_df_B01BAXKDN4/?tag=hyprod-20&linkCode=df0&hvadid=198075247191&hvpos=1o1&hvnetw=g&hvrand=12715964868364075974&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9033288&hvtargid=pla-317965496827&psc=1)) on pins J48. See the [Power Guide section of the Jetson Nano Developer Kit](https://developer.nvidia.com/embedded/dlc/jetson-nano-dev-kit-user-guide) for more details. Alternatively, a 5V-2.5A Micro-USB power supply will work without a jumper cable but may limit the performance of your Deepstream application. In all cases, please make sure to use the default `Max` power source mode (e.g. 10W).
 
 ![Jetson Nano](./assets/JetsonNano.png "NVIDIA Jetson Nano device used to run Deepstream with IoT Edge")
-
-- **Flash your Jetson Nano SD Card**: download and flash either this [JetPack version 4.3 image](https://developer.nvidia.com/embedded/jetpack) if you have an HDMI screen or the [image from this NVIDIA course](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info) otherwise (which is a great learning resource anyway!). The image from the course is also based on JetPack 4.3 but includes an USB Device Mode to use the Jetson Nano without HDMI screen. For the rest of this tutorial will assume that you use the device in USB Device Mode. In any cases, you can use [BalenaEtcher](https://www.balena.io/etcher/) tool to flash your SD card. Both of these images are based on Ubuntu 18.04 and already includes NVIDIA drivers version, CUDA and Nvidia-Docker. To double check your JetPack version, you can use the following command (JetPack 4.3 = Release 32, Revision 3):
-
-```bash
-head -n 1 /etc/nv_tegra_release
-```
-
-- **A developer's machine**: You need a developer's machine (Windows, Linux or Mac) to connect to your Jetson Nano device and see its results with a browser and VLC.
 
 - **A USB cable MicroB to Type A to connect your Jetson Nano to your developer's machine with the USB Device Mode**: we'll use the USB Device Mode provided in [NVIDIA's course base image](https://courses.nvidia.com/courses/course-v1:DLI+C-IV-02+V1/info). With this mode, you do not need to hook up a monitor directly to your Jetson Nano. Instead, boot your device and wait for 30 seconds then open your favorite browser, go to [http://192.168.55.1:8888](http://192.168.55.1:8888) and enter the password `dlinano` to get access to a command line terminal on your Jetson Nano. You can use this terminal to run instructions on your Jetson Nano (Ctrl+V is a handy shortcut to paste instructions) or your favorite SSH client if you prefer (`ssh dlinano@your-nano-ip-address` where password=`dlinano` and your nano ip address can be found with the command `/sbin/ifconfig eth0 | grep "inet" | head -n 1`)
 
 ![Jupyter Notebook](./assets/JupyterNotebook.png "Jetson Nano controlled by a Jupyter Notebook via the USB Device Mode")
 
-- **Connect your Jetson Nano to the internet**: Either use an ethernet connection, in which case you can skip this section or *if your device supports WiFi* (which is not out-of-the-box for standard dev kits) connect it to WiFi with the following commands from the USB Device Mode terminal:
-
-    1. Re-scan available WiFi networks
-
-        ```bash
-        nmcli device wifi rescan
-        ```
-
-    2. List available WiFi networks, and find the ``ssid_name`` of your network.
-
-        ```bash
-        nmcli device wifi list
-        ```
-
-    3. Connect to a selected WiFi network
-
-        ```bash
-        nmcli device wifi connect <ssid_name> password <password>
-        ```
-
 - **VLC to view RTSP video streams**: To visualize the output of the Jetson Nano without HDMI screen (there is only one per table), we'll use VLC from your laptop to view a RTSP video stream of the processed videos. [Install VLC](https://www.videolan.org/vlc/index.html) if you dont have it yet.
-
-- **An Azure subscription**: You need an Azure subscription to create an Azure IoT Central  application.
-
- **A phone with IP Camera Lite app**: To view & process a live video stream, you can use your phone with the IP Camera Lite app ([iOS](https://apps.apple.com/us/app/ip-camera-lite/id1013455241), [Android](https://play.google.com/store/apps/details?id=com.shenyaocn.android.WebCam&hl=en_US)) as an IP camera.
 
 The next sections walks you step-by-step to deploy Deepstream on an IoT Edge device, update its configuration via a pre-built IoT Central application and build a custom AI model with Custom Vision. It explains concepts along the way.
 
@@ -75,7 +45,7 @@ It formats all telemetry, properties, and commands using [IoT Plug and Play](htt
 
 ### Understanding NVIDIA DeepStream
 
-Deesptream is a SDK based on GStreamer, an open source, battle-tested platform to create video pipelines. It is very modular with its concepts of plugins. Each plugins have `sinks` and `sources`. NVIDIA provides several plugins as part of Deepstream which are optimized to leverage NVIDIA's GPUs or other NVIDIA hardware like dedicated encoding/decoding chips. How these plugins are connected with each others is defined in the application's configuration file.
+DeepStream is a SDK based on GStreamer, an open source, battle-tested platform to create video pipelines. It is very modular with its concepts of plugins. Each plugins have `sinks` and `sources`. NVIDIA provides several plugins as part of Deepstream which are optimized to leverage NVIDIA's GPUs or other NVIDIA hardware like dedicated encoding/decoding chips. How these plugins are connected with each others is defined in the application's configuration file.
 
 Here is an example of what an end-to-end DeepStream pipeline looks like:
 
@@ -100,7 +70,7 @@ IoT Edge connects to IoT Central with the regular Module SDK (you can look at th
 
 Enough documentation! Let's now see the solution built by our partner in action.
 
-## Operating the solution with IoT Central app
+## Setting up the solution
 
 Let's start by creating a new IoT Central app to remotely control the Jetson Nano.
 
@@ -109,9 +79,14 @@ Let's start by creating a new IoT Central app to remotely control the Jetson Nan
 We'll start from a pre-built template of IoT Central, which already includes a the pre-built Device Capability Model and IoT Edge deployment manigest mentionned above for our video analytics solution running on the NVIDIA Jetson Nano.
 
 - From your browser, go to: https://apps.azureiotcentral.com/build/new/af1fe1b4-d92e-45fc-9d1f-ea4decdc961d
+- Login with the following credentials:
+    - Username: `lab01_userXX@iotsummit.xyz` where XX = your Jetson Nano number, for instance `01`.
+    - Password: Use the one given in the room
 - Give a name and URL to your application
-- Select your Azure subscription (you can opt-in for a 7 day free trial)
-- Select your location
+- Select `Standard 2` Pricing plan.
+- Change the directory to be `Microsoft (microsoft.onmicrosoft.com)`
+- Select the `IoT_SubscriptionContainer_4` Azure subscription
+- Keep `United States` as your location
 - Click on `Create`
 
 ### Create an IoT Edge device from your IoT Central app
@@ -230,33 +205,21 @@ At this point, you should see 4 real-time video streams being processed to detec
 
 ![4 video streams processed real-time](./assets/4VideosProcessedRTSP.png "8 video streams processed in real-time by a Jetson Nano with Deepstream and IoT Edge")
 
-## Operating the solution
+## Operating the solution with IoT Central
 
- To demonstrate how to remotely manage this solution, we'll send a command to the device to change its input cameras. We'll use your phone as an RTSP camera as a new input camera.
+ To demonstrate how to remotely manage this solution, we'll send a command to the device to change its input cameras. We'll use your live RTSP cameras from the room as a new input camera.
 
 ![IoT Central](./assets/IoTCentral.png "IoT Central UI to remotely manage NVIDIA Jetson devices")
 
 ### Changing input cameras
 
-Let's first verify that your phone works as an RTSP camera properly:
-
-- Open the the IP Camera Lite
-- Go to Settings and remove the User and Password on the RTSP feed
-- Click on `Turn on IP Camera Server`
-
-Let's just verify that the camera is functional. With VLC:
-
-- Go to `Media` > `Open Network Stream`
-- Paste the following `RTSP Video URL`:  `rtsp://your-phone-ip-address:8554/live`
-- Click `Play` and verify that phone's camera is properly displaying.
-
-Let's now update your Jetson Nano to use your phone's camera. In IoT Central:
+Some RTSP cameras have been setup in the room. We'll send instructions to our Jetson Nano via IoT Central to connect to these live cameras and count the number of people in the room.
 
 - Go to the `Manage` tab
 - Unselect the `Demo Mode`, which uses several hardcoded video files as input of car traffic
 - Update the `Video Stream 1` property:
-    - In the `cameraId`, name your camera, for instance `My Phone`
-    - In the `videoStreamUrl`, enter the RTSP stream of this camera: `rtsp://your-phone-ip-address:8554/live`
+    - In the `cameraId`, name your camera, for instance `Room Camera 01`
+    - In the `videoStreamUrl`, enter the RTSP stream of this camera given in the room
 - Keep the default AI model of DeepStream by keeping the value `DeepStream ResNet 10` as the `AI model type`.
 - Keep the default `Secondary Detection Class` as `person`
 - Hit `Save`
@@ -275,9 +238,11 @@ Let's have a closer look at DeepStream configuration to see what has changed com
 
 Within a minute, DeepStream should restart. You can observe its status in IoT Central via the `Modules` tab. Once `deepstream` module is back to `Running`, copy again the `RTSP Video Url` field from the `Device` tab and give it to VLC (`Media` > `Open Network Stream` > paste the `RTSP Video URL` > `Play`).
 
-You should now detect people from your phone's camera. The count of `Person` in the `dashboard` tab *of your device* in IoT Central should go up. We've just remotely updated the configuration of this intelligent video analytics solution!
+You should now detect people from one of the room's camera. The count of `Person`, aka `Secondary Detection` in the `dashboard` tab *of your device* in IoT Central should go up.
 
-## Use an AI model to detect custom visual anomalies
+We've just remotely updated the configuration of this intelligent video analytics solution!
+
+## Use a custom AI model to detect visual anomalies
 
 We'll use simulated cameras to monitor each of the soda cans production lines and we'll collect images and build a custom AI model to detects cans that are up or down. We'll then deploy this custom AI model to DeepStream via IoT Central. To do a quick Proof Of Concept, we'll use the [Custom Vision service](https://www.customvision.ai/), a no-code computer vision AI model builder.
 
@@ -371,10 +336,14 @@ This is the end of the workshop. Because there will be another session that uses
     - Click on the `Administration` tab from the left nav
     - Click on `Delete` the application and confirm
 
+- **Deleting your Custom Vision project**, from your browser:
+    - Go to [Custom Vision](https://www.customvision.ai/)
+    - Click on `Delete` your Custom Vision project and confirm
+
 ## Going further
 
 Thank you for attending this workshop! We hope that you enjoyed it and found it valuable.
 
-If you want to run this workwhop at home, you can use [this set of instructions](AtHomeWorkshopInstructions.md), which can work with your own resources at home.
+If you want to run this workwhop at home, you can use [this set of instructions](README.md), which can work with your own resources at home.
 
 There are other content that you can try with your Jetson Nano at [http://aka.ms/jetson-on-azure](http://aka.ms/jetson-on-azure)!
