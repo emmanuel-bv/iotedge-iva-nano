@@ -98,8 +98,6 @@ We'll create a new IoT Edge device in your IoT Central application that will ena
 - Click on `New`
 - Give a name to your device by editing the `Device ID` and the `Device name` fields (let's use the same name for both of these fields in this workshop)
 - Click on `Create`
-- Select your new device and click on `Migrate`
-- Select the `NVIDIA Jetson Nano DCM` device template and confirm the migration
 - Click on your new device
 - Click on the `Connect` button in the top right corner
 - Copy your `ID Scope` value, `Device ID` value and `Primary key` value and save them for later.
