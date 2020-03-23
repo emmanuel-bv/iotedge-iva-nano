@@ -104,17 +104,63 @@ Let's start by creating a new IoT Central app to remotely control the Jetson Nan
 
 ### Create a new IoT Central app
 
-We'll start from a pre-built template of IoT Central, which already includes a the pre-built Device Capability Model and IoT Edge deployment manigest mentionned above for our video analytics solution running on the NVIDIA Jetson Nano.
+> [!WARNING]
+> Steps to create an IoT Central application have changed compared to the recording because the IoT Central team deprecated the copy of an IoT Central application that containers IoT Edge devices. The following steps have thus been revised to create an IoT Central application from scratch and manually add and configure the Jetson Nano device as an IoT Edge device in IoT Central.
 
-- From your browser, go to: https://apps.azureiotcentral.com/build/new/af1fe1b4-d92e-45fc-9d1f-ea4decdc961d
-- Give a name and URL to your application
-- Select your Azure subscription (you can opt-in for a 7 day free trial)
-- Select your location
-- Click on `Create`
+We'll start from a new IoT Central application, add an Device Capability Model and an IoT Edge deployment manifest that describe the video analytics solution running on the NVIDIA Jetson Nano and optionally customize our IoT Central application.
+
+- Create a new IoT Centra application:
+  - From your browser, go to: https://apps.azureiotcentral.com/build
+  - Sign-in with your Azure account
+  - Click on `Custom apps`
+  - Give a name and URL to your application
+  - Select your Azure subscription (you can opt-in for a 7 day free trial)
+  - Select your location
+  - Click on `Create`
+- Create a new Device Template:
+  - Click on `Device templates`
+  - Click on `Azure IoT Edge`
+  - Click on `Next: Customize`
+  - Click on `Skip + Review`
+  - Click on `Create`
+  - Replace the title of the newly created device template NVIDIA Jetson Nano  DCMto be `NVIDIA Jetson Nano DCM` and hit Enter
+  - Click on `Import capability model`
+  - Select a local copy of the file `NVIDIAJetsonNanoDcm.json` from this repo 
+- Configure your device dashboard:
+  - Click on `Views`
+  - Click on `Visualizing the device`
+  - Rename this View `Dashboard`
+  - From the `Telemetry` section, select `Primary Detection Count` and click on `Add tile`
+  - Click on the `Settings` button of the `Primary Detection Count` tile
+  - Unselect the `Primary Detection Class - Average` and instead select the `Primary Detection Class - Count` and click on `Update`
+  - From the `Telemetry` section, select `Secondary Detection Count` and click on `Add tile`
+  - Click on the `Settings` button of the `Secondary Detection Count` tile
+  - Unselect the `Secondary Detection Class - Average` and instead select the `Secondary Detection Class - Count` and click on `Update`
+  - From the `Telemetry` section, select `Free Memory` and `System Heartbeat` and click on `Add tile`
+  - From the `Telemetry` section, select `Change Video Model`, `Device Restart`, `Processing Started`, `Processing Stopped` and click on `Add tile`
+  - From the `Telemetry` section, select `Pipeline State` and click on `Add tile`
+  - Optionally, rearrange the tiles to your taste
+  - Hit `Save`
+- Configure your device properties:
+  - Click on `Views`
+  - Click on `Visualizing the device`
+  - Rename this View `Device`
+  - From the `Properties` section, select `Device model`, `Manufacturer`, `Operating system name`, `Processor architecture`, `Processor manufacturer`, `Software version`, `Total memory`, `Total storage`, `RTSP Video Url` and click on `Add tile`
+  - Resize the tile appropriately
+  - Hit `Save`
+- Optionally, add an `About` view to give a description of your device
+- Optionally, white label your IoT Central application by going to `Administration > Your Application` and `Administration > Customize your application`
+- Upload your IoT Edge deployment manifest:
+  - Click on `Replace manifest`
+  - Click on `Upload`
+  - Select a local copy of the file `deployment.json` in the `config` folder of this repo
+  - Click on `Replace`
+- Finally, publish your device template so that it can be used:
+  - Click on `Publish` and confirm
 
 ### Create an IoT Edge device from your IoT Central app
 
-We'll create a new IoT Edge device in your IoT Central application that will enable the NVIDIA Jetson Nano to connect to IoT Central.
+We'll create a new IoT Edge device in your IoT Central application with the device template created above that will enable the NVIDIA Jetson Nano to connect to IoT Central.
 
 - Go to the `Devices` tab
 - Select the `NVIDIA Jetson Nano DCM` device template

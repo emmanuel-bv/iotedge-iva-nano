@@ -151,8 +151,8 @@
               "wpDemoMode": true,
               "wpAIModelProvider": "DeepStream",
               "wpCustomVisionModelUrl": "",
-              "wpPrimaryDetectionClass": "car",
-              "wpSecondaryDetectionClass": "person",
+              "wpPrimaryDetectionClass": "Car",
+              "wpSecondaryDetectionClass": "Person",
               "wpVideoStreamInput1": {
                   "cameraId": "",
                   "cameraRtspUrl": ""
