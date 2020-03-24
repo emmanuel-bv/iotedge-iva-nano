@@ -135,7 +135,7 @@ We'll start from a new IoT Central application, add an Device Capability Model a
   - Click on the `Settings` button of the `Primary Detection Count`, select `Count` instead of `Average` and click on `Update`
   - From the `Telemetry` section, select `Secondary Detection Count` and click on `Add tile`
   - Click on the `Settings` button of the `Secondary Detection Count` tile
-  - Click on the `Settings` button of the `Primary Detection Count`, select `Count` instead of `Average` and click on `Update`
+  - Click on the `Settings` button of the `Secondary Detection Count`, select `Count` instead of `Average` and click on `Update`
   - From the `Telemetry` section, select `Free Memory` and `System Heartbeat` and click on `Add tile`
   - From the `Telemetry` section, select `Change Video Model`, `Device Restart`, `Processing Started`, `Processing Stopped` and click on `Add tile`
   - From the `Telemetry` section, select `Pipeline State` and click on `Add tile`
