@@ -1,0 +1,125 @@
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "acr": {
+                "address": "ebertrams",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "username": "$CONTAINER_REGISTRY_USERNAME"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": ""
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+            },
+            "env": {
+              "usePersistentStorage": {
+                "value": false
+              },
+              "amqpSettings__enabled": {
+                "value": false
+              },
+              "httpSettings__enabled": {
+                "value": false
+              }
+            }
+          }
+        },
+        "modules": {
+          "deepstream": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "marketplace.azurecr.io/nvidia/deepstream-iot2-l4t:latest",
+              "createOptions": "{\"Entrypoint\":[\"/usr/bin/deepstream-test5-app\",\"-c\",\"DSConfig.txt\"],\"HostConfig\":{\"runtime\":\"nvidia\",\"NetworkMode\":\"host\",\"Binds\":[\"/data/misc/storage:/data/misc/storage\"]},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}},\"WorkingDir\":\"/data/misc/storage\"}"
+            }
+          },
+          "IoTCentralBridge": {
+            "settings": {
+              "image": "ebertrams/iotcentralbridge:0.1.0-arm64v8",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"9010/tcp\":[{\"HostPort\":\"9014\"}]},\"Binds\":[\"/data/misc:/data/misc\",\"/run/systemd:/run/systemd\",\"/var/run/docker.sock:/var/run/docker.sock\"],\"NetworkMode\":\"host\"},\"NetworkingConfig\":{\"EndpointsConfig\":{\"host\":{}}}}"
+            },
+            "type": "docker",
+            "env": {
+              "DEBUG_TELEMETRY": {
+                "value": "1"
+              },
+              "DEBUG_ROUTING_DATA": {
+                "value": "0"
+              },
+              "inferenceThrottle": {
+                "value": 2000
+              },
+              "FORCE_HEALTHCHECK": {
+                "value": "1"
+              }
+            },
+            "status": "running",
+            "restartPolicy": "always",
+            "version": "1.0"
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "NVDSToIoTCBridge": "FROM /messages/modules/deepstream/outputs/* INTO BrokeredEndpoint(\"/modules/IoTCentralBridge/inputs/dsmessages\")",
+          "filterToIoTHub": "FROM /messages/modules/IoTCentralBridge/* INTO $upstream"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 1
+        }
+      }
+    },
+    "IoTCentralBridge": {
+      "properties.desired": {
+        "wpDemoMode": true,
+        "wpAIModelProvider": "DeepStream",
+        "wpCustomVisionModelUrl": "",
+        "wpPrimaryDetectionClass": "Car",
+        "wpSecondaryDetectionClass": "Person",
+        "wpVideoStreamInput1": {
+          "cameraId": "",
+          "cameraRtspUrl": ""
+        },
+        "wpVideoStreamInput2": {
+          "cameraId": "",
+          "cameraRtspUrl": ""
+        },
+        "wpVideoStreamInput3": {
+          "cameraId": "",
+          "cameraRtspUrl": ""
+        },
+        "wpVideoStreamInput4": {
+          "cameraId": "",
+          "cameraRtspUrl": ""
+        }
+      }
+    }
+  }
+}
