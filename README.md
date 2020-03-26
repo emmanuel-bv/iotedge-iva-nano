@@ -7,6 +7,9 @@ We'll put ourselves in the shoes of a soda can manufacturer who wants to improve
 To satisfy the real-time, multiple cameras, custom AI model requirements, we'll build this solution using [NVIDIA Deepstream](https://developer.nvidia.com/deepstream-sdk) on a [NVIDIA Jetson Nano device](https://developer.nvidia.com/embedded/buy/jetson-nano-devkit). 
 We'll build our own AI model with [Azure Custom Vision](https://www.customvision.ai/). We'll deploy and connect it to the Cloud with [Azure IoT Edge](https://azure.microsoft.com/en-us/services/iot-edge/) and [Azure IoT Central](https://azure.microsoft.com/en-us/services/iot-central/). Azure IoT Central will be used to do the monitoring and alerting.
 
+Check out [this video recording](https://developer.nvidia.com/gtc/2020/video/s22675) to help you go through all the steps and concepts used in this workshop:
+[![Workshop Recording](./assets/WorkshopRecording.png "Recording of this workshop")](https://developer.nvidia.com/gtc/2020/video/s22675)
+
 ## Prerequisites
 
 - **Hardware**: You need a [NVIDIA Jetson Nano device](https://developer.nvidia.com/embedded/buy/jetson-nano-devkit) with a [5V-4A barrel jack power supply like this one](https://www.adafruit.com/product/1466), which requires a jumper cable (such as [these ones](https://www.amazon.com/120pcs-Multicolor-Jumper-Arduino-Raspberry/dp/B01BAXKDN4/ref=asc_df_B01BAXKDN4/?tag=hyprod-20&linkCode=df0&hvadid=198075247191&hvpos=1o1&hvnetw=g&hvrand=12715964868364075974&hvpone=&hvptwo=&hvqmt=&hvdev=c&hvdvcmdl=&hvlocint=&hvlocphy=9033288&hvtargid=pla-317965496827&psc=1)) on pins J48. See the [Power Guide section of the Jetson Nano Developer Kit](https://developer.nvidia.com/embedded/dlc/jetson-nano-dev-kit-user-guide) for more details. Alternatively, a 5V-2.5A Micro-USB power supply will work without a jumper cable but may limit the performance of your Deepstream application. In all cases, please make sure to use the default `Max` power source mode (e.g. 10W).
