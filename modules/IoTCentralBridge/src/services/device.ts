@@ -1,7 +1,6 @@
 import { inject, service } from 'spryly';
 import { Server } from '@hapi/hapi';
 import { ConfigService } from './config';
-import { LoggingService } from './logging';
 import {
     IoTCentralService,
     ModuleInfoFieldIds,
@@ -26,9 +25,6 @@ export class DeviceService {
     @inject('config')
     private config: ConfigService;
 
-    @inject('logger')
-    private logger: LoggingService;
-
     @inject('iotCentral')
     private iotCentral: IoTCentralService;
 
@@ -37,7 +33,7 @@ export class DeviceService {
     private deepStreamModuleName: string = defaultDeepStreamModuleName;
 
     public async init(): Promise<void> {
-        this.logger.log(['DeviceService', 'info'], 'initialize');
+        this.server.log(['DeviceService', 'info'], 'initialize');
 
         this.server.method({ name: 'device.restartDeepStream', method: this.restartDeepStream });
         this.server.method({ name: 'device.restartDevice', method: this.restartDevice });
@@ -62,7 +58,7 @@ export class DeviceService {
 
     @bind
     public async restartDevice(timeout: number, reason: string): Promise<void> {
-        this.logger.log(['DeviceService', 'info'], `Module restart requested...`);
+        this.server.log(['DeviceService', 'info'], `Module restart requested...`);
         if (_get(process.env, 'LOCAL_DEBUG') === '1') {
             return;
         }
@@ -87,7 +83,7 @@ export class DeviceService {
             await promisify(exec)(`reboot --reboot`);
         }
         catch (ex) {
-            this.logger.log(['DeviceService', 'error'], `Failed to auto-restart device - will exit container now: ${ex.message}`);
+            this.server.log(['DeviceService', 'error'], `Failed to auto-restart device - will exit container now: ${ex.message}`);
         }
 
         // let Docker restart our container
@@ -96,7 +92,7 @@ export class DeviceService {
 
     @bind
     private async restartDockerImage(containerName?: string): Promise<any> {
-        this.logger.log(['DeviceService', 'info'], `Restarting DeepStream container...`);
+        this.server.log(['DeviceService', 'info'], `Restarting DeepStream container...`);
 
         const options = {
             method: 'POST',
@@ -112,12 +108,12 @@ export class DeviceService {
         return new Promise((resolve, reject) => {
             request(options, (requestError, response, body) => {
                 if (requestError) {
-                    this.logger.log(['DeviceService', 'error', 'dockerRequest'], `dockerRequest error: ${requestError.message}`);
+                    this.server.log(['DeviceService', 'error', 'dockerRequest'], `dockerRequest error: ${requestError.message}`);
                     return reject(requestError);
                 }
 
                 if (response.statusCode < 200 || response.statusCode > 299) {
-                    this.logger.log(['DeviceService', 'error', 'dockerRequest'], `Response status code = ${response.statusCode}`);
+                    this.server.log(['DeviceService', 'error', 'dockerRequest'], `Response status code = ${response.statusCode}`);
 
                     const errorMessage = body.message || body || 'An error occurred';
                     return reject(new Error(`Error statusCode: ${response.statusCode}, ${errorMessage}`));

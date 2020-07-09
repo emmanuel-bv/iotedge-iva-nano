@@ -122,9 +122,6 @@
                         },
                         "inferenceThrottle": {
                             "value": 2000
-                        },
-                        "FORCE_HEALTHCHECK": {
-                            "value": "1"
                         }
                       },
                       "status": "running",

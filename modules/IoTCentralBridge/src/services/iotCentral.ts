@@ -11,9 +11,8 @@ import {
     freemem as osFreeMem,
     loadavg as osLoadAvg
 } from 'os';
-import { LoggingService } from './logging';
 import { ConfigService } from './config';
-import { StateService } from './state';
+import { StorageService } from './storage';
 import { Mqtt } from 'azure-iot-device-mqtt';
 import {
     ModuleClient,
@@ -134,14 +133,11 @@ export class IoTCentralService {
     @inject('$server')
     private server: Server;
 
-    @inject('logger')
-    private logger: LoggingService;
-
     @inject('config')
     private config: ConfigService;
 
-    @inject('state')
-    private state: StateService;
+    @inject('storage')
+    private storage: StorageService;
 
     private serviceInitializing: boolean = true;
     private healthState = HealthState.Good;
@@ -204,7 +200,7 @@ export class IoTCentralService {
     }
 
     public async init(): Promise<void> {
-        this.logger.log(['IoTCentral', 'info'], 'initialize');
+        this.server.log(['IoTCentral', 'info'], 'initialize');
 
         this.server.method({ name: 'iotCentral.connectToIoTCentral', method: this.connectToIoTCentral });
 
@@ -217,7 +213,7 @@ export class IoTCentralService {
     }
 
     public async getHealth(): Promise<number> {
-        let healthState = HealthState.Good;
+        let healthState = this.healthState;
 
         await this.sendMeasurement({
             [ModuleInfoFieldIds.Telemetry.InferenceRate]: this.inferenceRateCount / (healthCheckInterval || 1)
@@ -225,27 +221,30 @@ export class IoTCentralService {
         this.inferenceRateCount = 0;
 
         try {
-            const systemProperties = await this.getSystemProperties();
-            const freeMemory = _get(systemProperties, 'freeMemory') || 0;
+            if (healthState === HealthState.Good) {
+                const systemProperties = await this.getSystemProperties();
+                const freeMemory = _get(systemProperties, 'freeMemory') || 0;
 
-            await this.sendMeasurement({ [ModuleInfoFieldIds.Telemetry.FreeMemory]: freeMemory });
+                // TODO:
+                // Find the right threshold for this metric
+                if (freeMemory === 0) {
+                    healthState = HealthState.Critical;
+                }
 
-            // TODO:
-            // Find the right threshold for this metric
-            if (freeMemory === 0) {
-                healthState = HealthState.Critical;
+                await this.sendMeasurement({
+                    [ModuleInfoFieldIds.Telemetry.FreeMemory]: freeMemory,
+                    [ModuleInfoFieldIds.Telemetry.SystemHeartbeat]: healthState
+                });
             }
+
+            this.healthState = healthState
         }
         catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Error calling systemProperties: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `Error calling systemProperties: ${ex.message}`);
             healthState = HealthState.Critical;
         }
 
-        if (this.healthState < HealthState.Good) {
-            healthState = this.healthState;
-        }
-
-        return healthState;
+        return this.healthState;
     }
 
     @bind
@@ -253,18 +252,20 @@ export class IoTCentralService {
         let result = true;
 
         try {
-            this.logger.log(['IoTCentralService', 'info'], `Starting client connection sequence...`);
+            this.server.log(['IoTCentralService', 'info'], `Starting client connection sequence...`);
 
             result = await this.connectIotcClient();
 
-            await this.deferredStart.promise;
+            if (result === true) {
+                await this.deferredStart.promise;
+            }
 
-            this.logger.log(['IoTCentralService', 'info'], `Finished client connection sequence...`);
+            this.server.log(['IoTCentralService', 'info'], `Finished client connection sequence...`);
         }
         catch (ex) {
             result = false;
 
-            this.logger.log(['IoTCentralService', 'error'], `Exception during IoT Central device provsioning: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `Exception during IoT Central device provsioning: ${ex.message}`);
         }
 
         this.healthState = result === true ? HealthState.Good : HealthState.Critical;
@@ -281,12 +282,12 @@ export class IoTCentralService {
         }
 
         try {
-            this.logger.log(['IoTCentralService', 'info'], `IOTEDGE_WORKLOADURI: ${this.config.get('IOTEDGE_WORKLOADURI')}`);
-            this.logger.log(['IoTCentralService', 'info'], `IOTEDGE_DEVICEID: ${this.config.get('IOTEDGE_DEVICEID')}`);
-            this.logger.log(['IoTCentralService', 'info'], `IOTEDGE_MODULEID: ${this.config.get('IOTEDGE_MODULEID')}`);
-            this.logger.log(['IoTCentralService', 'info'], `IOTEDGE_MODULEGENERATIONID: ${this.config.get('IOTEDGE_MODULEGENERATIONID')}`);
-            this.logger.log(['IoTCentralService', 'info'], `IOTEDGE_IOTHUBHOSTNAME: ${this.config.get('IOTEDGE_IOTHUBHOSTNAME')}`);
-            this.logger.log(['IoTCentralService', 'info'], `IOTEDGE_AUTHSCHEME: ${this.config.get('IOTEDGE_AUTHSCHEME')}`);
+            this.server.log(['IoTCentralService', 'info'], `IOTEDGE_WORKLOADURI: ${this.config.get('IOTEDGE_WORKLOADURI')}`);
+            this.server.log(['IoTCentralService', 'info'], `IOTEDGE_DEVICEID: ${this.config.get('IOTEDGE_DEVICEID')}`);
+            this.server.log(['IoTCentralService', 'info'], `IOTEDGE_MODULEID: ${this.config.get('IOTEDGE_MODULEID')}`);
+            this.server.log(['IoTCentralService', 'info'], `IOTEDGE_MODULEGENERATIONID: ${this.config.get('IOTEDGE_MODULEGENERATIONID')}`);
+            this.server.log(['IoTCentralService', 'info'], `IOTEDGE_IOTHUBHOSTNAME: ${this.config.get('IOTEDGE_IOTHUBHOSTNAME')}`);
+            this.server.log(['IoTCentralService', 'info'], `IOTEDGE_AUTHSCHEME: ${this.config.get('IOTEDGE_AUTHSCHEME')}`);
 
             // tslint:disable-next-line:prefer-conditional-expression
             if (_get(process.env, 'LOCAL_DEBUG') === '1') {
@@ -297,7 +298,7 @@ export class IoTCentralService {
             }
         }
         catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Failed to instantiate client interface from configuraiton: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `Failed to instantiate client interface from configuraiton: ${ex.message}`);
         }
 
         if (!this.iotcClient) {
@@ -308,7 +309,7 @@ export class IoTCentralService {
             try {
                 await this.iotcClient.open();
 
-                this.logger.log(['IoTCentralService', 'info'], `Client is connected`);
+                this.server.log(['IoTCentralService', 'info'], `Client is connected`);
 
                 this.iotcClient.on('inputMessage', this.onHandleDownstreamMessages);
                 this.iotcClient.on('error', this.onIotcClientError);
@@ -322,9 +323,10 @@ export class IoTCentralService {
                 this.iotcClientConnected = true;
 
                 const systemProperties = await this.getSystemProperties();
+                const moduleProperties = await this.getModuleProperties();
 
                 const deviceProperties = {
-                    ...this.state.iotCentral.properties,
+                    ...moduleProperties,
                     [IoTCentralDeviceFieldIds.Property.OsName]: osPlatform() || '',
                     [IoTCentralDeviceFieldIds.Property.SwVersion]: osRelease() || '',
                     [IoTCentralDeviceFieldIds.Property.ProcessorArchitecture]: osArch() || '',
@@ -333,13 +335,13 @@ export class IoTCentralService {
                     [ModuleInfoFieldIds.Property.RtspVideoUrl]: `rtsp://${this.moduleIpAddress}:8554/ds-test`,
                     [ModuleInfoFieldIds.Property.VideoTaggingClientUrl]: `http://${this.moduleIpAddress}:3000`
                 };
-                this.logger.log(['IoTCentralService', 'info'], `Updating device properties: ${JSON.stringify(deviceProperties, null, 4)}`);
+                this.server.log(['IoTCentralService', 'info'], `Updating device properties: ${JSON.stringify(deviceProperties, null, 4)}`);
 
                 await this.updateDeviceProperties(deviceProperties);
             }
             catch (ex) {
                 connectionStatus = `IoT Central connection error: ${ex.message}`;
-                this.logger.log(['IoTCentralService', 'error'], connectionStatus);
+                this.server.log(['IoTCentralService', 'error'], connectionStatus);
 
                 result = false;
             }
@@ -357,7 +359,7 @@ export class IoTCentralService {
             await this.sendMeasurement(inferenceTelemetryData);
         }
         catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `sendInferenceData: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `sendInferenceData: ${ex.message}`);
         }
     }
 
@@ -373,7 +375,7 @@ export class IoTCentralService {
             await this.iotcClient.sendEvent(iotcMessage);
 
             if (_get(process.env, 'DEBUG_TELEMETRY') === '1') {
-                this.logger.log(['IoTCentralService', 'info'], `sendEvent: ${JSON.stringify(data, null, 4)}`);
+                this.server.log(['IoTCentralService', 'info'], `sendEvent: ${JSON.stringify(data, null, 4)}`);
             }
 
             for (const key in data) {
@@ -385,7 +387,7 @@ export class IoTCentralService {
             }
         }
         catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `sendMeasurement: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `sendMeasurement: ${ex.message}`);
         }
     }
 
@@ -405,10 +407,10 @@ export class IoTCentralService {
                 });
             });
 
-            this.logger.log(['IoTCentralService', 'info'], `Module live properties updated: ${JSON.stringify(properties, null, 4)}`);
+            this.server.log(['IoTCentralService', 'info'], `Module live properties updated: ${JSON.stringify(properties, null, 4)}`);
         }
         catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Error while updating client properties: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `Error while updating client properties: ${ex.message}`);
         }
     }
 
@@ -425,6 +427,19 @@ export class IoTCentralService {
         };
     }
 
+    private async getModuleProperties(): Promise<any> {
+        let result = {};
+
+        try {
+            result = await this.storage.get('state', 'iotCentral.properties');
+        }
+        catch (ex) {
+            this.server.log(['ModuleService', 'error'], `Error reading module properties: ${ex.message}`);
+        }
+
+        return result;
+    }
+
     public async setPipelineState(pipelineState: PipelineState) {
         const newPipelineState = pipelineState === PipelineState.Active ? true : false;
 
@@ -439,7 +454,7 @@ export class IoTCentralService {
 
     @bind
     private async onHandleDownstreamMessages(inputName, message) {
-        // this.logger.log(['IoTCentralService', 'info'], `Received downstream message: ${JSON.stringify(message, null, 4)}`);
+        // this.server.log(['IoTCentralService', 'info'], `Received downstream message: ${JSON.stringify(message, null, 4)}`);
 
         await this.setPipelineState(PipelineState.Active);
 
@@ -454,18 +469,18 @@ export class IoTCentralService {
                 await this.processDeepStreamInference(messageData);
             }
             else {
-                this.logger.log(['IoTCentralService', 'warning'], `Warning: received routed message for unknown input: ${inputName}`);
+                this.server.log(['IoTCentralService', 'warning'], `Warning: received routed message for unknown input: ${inputName}`);
             }
         }
         catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Error while handling downstream message: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `Error while handling downstream message: ${ex.message}`);
         }
     }
 
     @bind
     private async onHandleModuleProperties(desiredChangedSettings: any) {
         try {
-            this.logger.log(['IoTCentralService', 'info'], `desiredPropsDelta:\n${JSON.stringify(desiredChangedSettings, null, 4)}`);
+            this.server.log(['IoTCentralService', 'info'], `desiredPropsDelta:\n${JSON.stringify(desiredChangedSettings, null, 4)}`);
 
             const patchedProperties = {};
             let needRestart = false;
@@ -503,7 +518,7 @@ export class IoTCentralService {
                         break;
 
                     default:
-                        this.logger.log(['IoTCentralService', 'error'], `Received desired property change for unknown setting '${setting}'`);
+                        this.server.log(['IoTCentralService', 'error'], `Received desired property change for unknown setting '${setting}'`);
                         break;
                 }
 
@@ -516,20 +531,20 @@ export class IoTCentralService {
                 await this.updateDeviceProperties(patchedProperties);
 
                 if (needRestart) {
-                    await this.server.methods.module.updateDSConfiguration();
-                    await this.server.methods.device.restartDockerImage();
+                    await (this.server.methods.module as any).updateDSConfiguration();
+                    await (this.server.methods.device as any).restartDockerImage();
                 }
             }
         }
         catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Exception while handling desired properties: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `Exception while handling desired properties: ${ex.message}`);
         }
 
         this.deferredStart.resolve();
     }
 
     private async moduleSettingChange(setting: string, value: any): Promise<any> {
-        this.logger.log(['IoTCentralService', 'info'], `Handle module setting change for '${setting}': ${typeof value === 'object' && value !== null ? JSON.stringify(value, null, 4) : value}`);
+        this.server.log(['IoTCentralService', 'info'], `Handle module setting change for '${setting}': ${typeof value === 'object' && value !== null ? JSON.stringify(value, null, 4) : value}`);
 
         const result = {
             value: undefined,
@@ -553,7 +568,7 @@ export class IoTCentralService {
                 break;
 
             default:
-                this.logger.log(['IoTCentralService', 'info'], `Unknown module setting change request '${setting}'`);
+                this.server.log(['IoTCentralService', 'info'], `Unknown module setting change request '${setting}'`);
                 result.status = false;
         }
 
@@ -567,8 +582,8 @@ export class IoTCentralService {
         this.iotcTelemetryThrottleTimer = Date.now();
 
         if (_get(process.env, 'DEBUG_ROUTING_DATA') === '1') {
-            this.logger.log(['IoTCentralService', 'info'], `Processing downstream data`);
-            this.logger.log(['IoTCentralService', 'info'], `messageData: ${messageData}`);
+            this.server.log(['IoTCentralService', 'info'], `Processing downstream data`);
+            this.server.log(['IoTCentralService', 'info'], `messageData: ${messageData}`);
         }
 
         const messageJson = JSON.parse(messageData);
@@ -621,37 +636,37 @@ export class IoTCentralService {
     @bind
     // @ts-ignore (commandRequest)
     private async iotcClientRestartDeepStream(commandRequest: DeviceMethodRequest, commandResponse: DeviceMethodResponse) {
-        this.logger.log(['IoTCentralService', 'info'], `${ModuleInfoFieldIds.Command.RestartDeepStream} command received`);
+        this.server.log(['IoTCentralService', 'info'], `${ModuleInfoFieldIds.Command.RestartDeepStream} command received`);
 
         try {
             await commandResponse.send(200);
         }
         catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Error sending response for ${ModuleInfoFieldIds.Command.RestartDeepStream} command: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `Error sending response for ${ModuleInfoFieldIds.Command.RestartDeepStream} command: ${ex.message}`);
         }
 
-        await this.server.methods.device.restartDeepStream();
+        await (this.server.methods.device as any).restartDeepStream();
     }
 
     @bind
     // @ts-ignore (commandResponse)
     private async iotcClientRestartDevice(commandRequest: DeviceMethodRequest, commandResponse: DeviceMethodResponse) {
-        this.logger.log(['IoTCentralService', 'info'], `${ModuleInfoFieldIds.Command.RestartDevice} command received`);
+        this.server.log(['IoTCentralService', 'info'], `${ModuleInfoFieldIds.Command.RestartDevice} command received`);
 
         try {
             await commandResponse.send(200);
         }
         catch (ex) {
-            this.logger.log(['IoTCentralService', 'error'], `Error sending response for ${ModuleInfoFieldIds.Command.RestartDevice} command: ${ex.message}`);
+            this.server.log(['IoTCentralService', 'error'], `Error sending response for ${ModuleInfoFieldIds.Command.RestartDevice} command: ${ex.message}`);
         }
 
         const timeout = _get(commandRequest, `payload.${RestartDeviceCommandParams.Timeout}`);
-        await this.server.methods.device.restartDevice(timeout, 'RestartDevice command received');
+        await (this.server.methods.device as any).restartDevice(timeout, 'RestartDevice command received');
     }
 
     @bind
     private onIotcClientError(error: Error) {
-        this.logger.log(['IoTCentralService', 'error'], `Client connection error: ${error.message}`);
+        this.server.log(['IoTCentralService', 'error'], `Client connection error: ${error.message}`);
         this.healthState = HealthState.Critical;
     }
 }

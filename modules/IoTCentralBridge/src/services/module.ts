@@ -1,7 +1,6 @@
 import { service, inject } from 'spryly';
 import { Server } from '@hapi/hapi';
 import { ConfigService } from './config';
-import { LoggingService } from './logging';
 import {
     ModuleInfoFieldIds,
     ModuleState,
@@ -56,9 +55,6 @@ export class ModuleService {
     @inject('config')
     private config: ConfigService;
 
-    @inject('logger')
-    private logger: LoggingService;
-
     @inject('iotCentral')
     private iotCentral: IoTCentralService;
 
@@ -74,7 +70,7 @@ export class ModuleService {
     private unzipCommand: string = defaultUnzipCommand;
 
     public async init(): Promise<void> {
-        this.logger.log(['ModuleService', 'info'], 'initialize');
+        this.server.log(['ModuleService', 'info'], 'initialize');
 
         this.server.method({ name: 'module.startService', method: this.startService });
         this.server.method({ name: 'module.updateDSConfiguration', method: this.updateDSConfiguration });
@@ -98,7 +94,7 @@ export class ModuleService {
 
     @bind
     public async startService(): Promise<void> {
-        this.logger.log(['ModuleService', 'info'], `Starting module service...`);
+        this.server.log(['ModuleService', 'info'], `Starting module service...`);
 
         await this.iotCentral.sendMeasurement({
             [ModuleInfoFieldIds.State.ModuleState]: ModuleState.Active,
@@ -111,7 +107,7 @@ export class ModuleService {
 
         if (iotCentralHealth < HealthState.Good) {
 
-            this.logger.log(['ModuleService', 'info'], `Health check iot:${iotCentralHealth}`);
+            this.server.log(['ModuleService', 'info'], `Health check iot:${iotCentralHealth}`);
 
             return HealthState.Critical;
         }
@@ -137,20 +133,20 @@ export class ModuleService {
                 return '';
             }
 
-            this.logger.log(['ModuleService', 'info'], `Downloading model package: ${fileName}`);
+            this.server.log(['ModuleService', 'info'], `Downloading model package: ${fileName}`);
 
             result = await new Promise((resolve, reject) => {
                 request
                     .get(videoModelUrl)
                     .on('error', (error) => {
-                        this.logger.log(['ModuleService', 'error'], `Error downloading model package: ${error.message}`);
+                        this.server.log(['ModuleService', 'error'], `Error downloading model package: ${error.message}`);
                         return reject(error);
                     })
                     .on('response', (data) => {
                         const totalBytes = parseInt(data.headers['content-length'], 10) || 1;
                         progressChunk = Math.floor(totalBytes / 10);
 
-                        this.logger.log(['ModuleService', 'info'], `Downloading model package - total bytes: ${totalBytes}`);
+                        this.server.log(['ModuleService', 'info'], `Downloading model package - total bytes: ${totalBytes}`);
                     })
                     .on('data', (chunk) => {
                         receivedBytes += chunk.length;
@@ -158,11 +154,11 @@ export class ModuleService {
                         if (receivedBytes > (progressTotal + progressChunk)) {
                             progressTotal += progressChunk;
 
-                            this.logger.log(['ModuleService', 'info'], `Downloading video model package - received bytes: ${receivedBytes}`);
+                            this.server.log(['ModuleService', 'info'], `Downloading video model package - received bytes: ${receivedBytes}`);
                         }
                     })
                     .on('end', () => {
-                        this.logger.log(['ModuleService', 'info'], `Finished downloading video model package: ${fileName}`);
+                        this.server.log(['ModuleService', 'info'], `Finished downloading video model package: ${fileName}`);
                         return resolve(fileName);
                     })
                     .pipe(fse.createWriteStream(pathResolve(this.storageFolderPath, fileName)))
@@ -175,7 +171,7 @@ export class ModuleService {
             });
         }
         catch (ex) {
-            this.logger.log(['ModuleService', 'error'], `Error downloading model package: ${ex.message}`);
+            this.server.log(['ModuleService', 'error'], `Error downloading model package: ${ex.message}`);
             result = '';
         }
 
@@ -188,7 +184,7 @@ export class ModuleService {
             [ModuleInfoFieldIds.State.ModuleState]: ModuleState.Inactive
         });
 
-        this.logger.log(['ModuleService', 'info'], `updateDSConfiguration:\n${JSON.stringify(this.iotCentral.detectionSettings, null, 4)}`);
+        this.server.log(['ModuleService', 'info'], `updateDSConfiguration:\n${JSON.stringify(this.iotCentral.detectionSettings, null, 4)}`);
 
         if (this.iotCentral.detectionSettings.wpDemoMode === true) {
             await this.saveDSResNetDemoConfiguration();
@@ -200,7 +196,7 @@ export class ModuleService {
             await this.saveCustomVisionConfiguration();
         }
         else {
-            this.logger.log(['ModuleService', 'warning'], `Updating DS configuration: nothing to set so skipping...`);
+            this.server.log(['ModuleService', 'warning'], `Updating DS configuration: nothing to set so skipping...`);
         }
 
         await this.iotCentral.sendMeasurement({
@@ -211,7 +207,7 @@ export class ModuleService {
     private async changeVideoModel(videoModelUrl: string): Promise<boolean> {
         let status = true;
 
-        this.logger.log(['ModuleService', 'info'], `Changing video model...`);
+        this.server.log(['ModuleService', 'info'], `Changing video model...`);
 
         try {
             const fileName = await this.saveUrlModelPackage(videoModelUrl);
@@ -224,7 +220,7 @@ export class ModuleService {
             }
         }
         catch (ex) {
-            this.logger.log(['ModuleService', 'info'], `Error while changing video model: ${ex.message}`);
+            this.server.log(['ModuleService', 'info'], `Error while changing video model: ${ex.message}`);
             status = false;
         }
 
@@ -239,32 +235,32 @@ export class ModuleService {
 
         try {
             if (fse.statSync(destFilePath).size <= 0) {
-                this.logger.log(['ModuleService', 'error'], `Empty video model package detected - skipping`);
+                this.server.log(['ModuleService', 'error'], `Empty video model package detected - skipping`);
                 return false;
             }
 
-            this.logger.log(['ModuleService', 'info'], `Removing any existing target unzip dir: ${destUnzipDir}`);
+            this.server.log(['ModuleService', 'info'], `Removing any existing target unzip dir: ${destUnzipDir}`);
             await promisify(exec)(`rm -rf ${destUnzipDir}`);
 
             const unzipCommand = this.unzipCommand.replace('###UNZIPDIR', destUnzipDir).replace('###TARGET', destFilePath);
             const { stdout } = await promisify(exec)(unzipCommand);
-            this.logger.log(['ModuleService', 'info'], `Extracted files: ${stdout}`);
+            this.server.log(['ModuleService', 'info'], `Extracted files: ${stdout}`);
 
-            this.logger.log(['ModuleService', 'info'], `Removing zip package: ${destFilePath}`);
+            this.server.log(['ModuleService', 'info'], `Removing zip package: ${destFilePath}`);
             await promisify(exec)(`rm -f ${destFilePath}`);
 
-            this.logger.log(['ModuleService', 'info'], `Done extracting in: ${destUnzipDir}`);
+            this.server.log(['ModuleService', 'info'], `Done extracting in: ${destUnzipDir}`);
             return this.ensureModelFilesExist(destUnzipDir);
         }
         catch (ex) {
-            this.logger.log(['ModuleService', 'error'], `Error extracting files: ${ex.message}`);
+            this.server.log(['ModuleService', 'error'], `Error extracting files: ${ex.message}`);
         }
 
         return false;
     }
 
     private async ensureModelFilesExist(modelFolder: string): Promise<boolean> {
-        this.logger.log(['ModuleService', 'info'], `Ensure model files exist in: ${modelFolder}`);
+        this.server.log(['ModuleService', 'info'], `Ensure model files exist in: ${modelFolder}`);
 
         try {
             const modelFiles = await fse.readdir(modelFolder);
@@ -275,7 +271,7 @@ export class ModuleService {
             }
         }
         catch (ex) {
-            this.logger.log(['ModuleService', 'error'], `Error enumerating model files: ${ex.message}`);
+            this.server.log(['ModuleService', 'error'], `Error enumerating model files: ${ex.message}`);
         }
 
         return false;
@@ -288,25 +284,25 @@ export class ModuleService {
         const destUnzipDir = destFilePath.slice(0, -4);
 
         try {
-            this.logger.log(['ModuleService', 'info'], `Copying new model files from: ${destUnzipDir}`);
+            this.server.log(['ModuleService', 'info'], `Copying new model files from: ${destUnzipDir}`);
             await promisify(exec)(`rm -f ${this.onnxModelFolderPath}/*.engine`);
             await promisify(exec)(`cp ${pathResolve(destUnzipDir, 'model.onnx')} ${this.onnxModelFolderPath}`);
             await promisify(exec)(`cp ${pathResolve(destUnzipDir, 'labels.txt')} ${this.onnxModelFolderPath}`);
 
-            this.logger.log(['ModuleService', 'info'], `Removing unzipped model folder: ${destUnzipDir}`);
+            this.server.log(['ModuleService', 'info'], `Removing unzipped model folder: ${destUnzipDir}`);
             await promisify(exec)(`rm -rf ${destUnzipDir}`);
 
             return true;
         }
         catch (ex) {
-            this.logger.log(['ModuleService', 'error'], `Error extracting files: ${ex.message}`);
+            this.server.log(['ModuleService', 'error'], `Error extracting files: ${ex.message}`);
         }
 
         return false;
     }
 
     private async saveDSResNetDemoConfiguration() {
-        this.logger.log(['ModuleService', 'info'], `Setting carsDemo configuration`);
+        this.server.log(['ModuleService', 'info'], `Setting carsDemo configuration`);
         await promisify(exec)(`cp ${pathResolve(this.resNetConfigFolderPath, 'carsConfig.txt')} ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
 
         await this.iotCentral.setPipelineState(PipelineState.Active);
@@ -367,7 +363,7 @@ export class ModuleService {
             sedCommands.push(`s/###BATCH_SIZE/${this.batchSizeMap[activeStreams]}/g;`);
             sedCommands.push(`" ${pathResolve(this.resNetConfigFolderPath, 'DSConfig_Template.txt')} > ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
 
-            this.logger.log(['ModuleService', 'info'], `Executing sed command: ${sedCommands.join('')}`);
+            this.server.log(['ModuleService', 'info'], `Executing sed command: ${sedCommands.join('')}`);
 
             await promisify(exec)(sedCommands.join(''));
 
@@ -378,7 +374,7 @@ export class ModuleService {
             status = true;
         }
         catch (ex) {
-            this.logger.log(['ModuleService', 'error'], `Exception while updating DSConfig.txt: ${ex.message}`);
+            this.server.log(['ModuleService', 'error'], `Exception while updating DSConfig.txt: ${ex.message}`);
         }
 
         return status;
@@ -391,7 +387,7 @@ export class ModuleService {
             const customVisionModelUrl = this.iotCentral.detectionSettings.wpCustomVisionModelUrl;
 
             if (!customVisionModelUrl) {
-                this.logger.log(['ModuleService', 'warning'], `No Custom Vision model url - skipping...`);
+                this.server.log(['ModuleService', 'warning'], `No Custom Vision model url - skipping...`);
                 return false;
             }
 
@@ -409,13 +405,13 @@ export class ModuleService {
             fse.writeFileSync(pathResolve(this.onnxModelFolderPath, 'labels.txt'), labelData);
 
             const numClasses = labelData.split('\n').length;
-            this.logger.log(['ModuleService', 'info'], `Number of class labels detected: ${numClasses}`);
+            this.server.log(['ModuleService', 'info'], `Number of class labels detected: ${numClasses}`);
 
             const sedConfigInferCommands = [`sed "`];
             sedConfigInferCommands.push(`s/###CLASSES_COUNT/${numClasses}/g;`);
             sedConfigInferCommands.push(`" ${pathResolve(this.onnxConfigFolderPath, 'config_infer_onnx_template.txt')} > ${pathResolve(this.onnxConfigFolderPath, 'config_infer_onnx.txt')}`);
 
-            this.logger.log(['ModuleService', 'info'], `Executing sed command: ${sedConfigInferCommands.join('')}`);
+            this.server.log(['ModuleService', 'info'], `Executing sed command: ${sedConfigInferCommands.join('')}`);
 
             await promisify(exec)(sedConfigInferCommands.join(''));
 
@@ -424,7 +420,7 @@ export class ModuleService {
 
             sedCommands.push(`" ${pathResolve(this.onnxConfigFolderPath, 'onnxConfig_template.txt')} > ${pathResolve(this.storageFolderPath, 'DSConfig.txt')}`);
 
-            this.logger.log(['ModuleService', 'info'], `Executing sed command: ${sedCommands.join('')}`);
+            this.server.log(['ModuleService', 'info'], `Executing sed command: ${sedCommands.join('')}`);
 
             await promisify(exec)(sedCommands.join(''));
 
@@ -435,7 +431,7 @@ export class ModuleService {
             status = true;
         }
         catch (ex) {
-            this.logger.log(['ModuleService', 'error'], `Exception while updating DSConfig.txt: ${ex.message}`);
+            this.server.log(['ModuleService', 'error'], `Exception while updating DSConfig.txt: ${ex.message}`);
         }
 
         return status;
@@ -459,13 +455,13 @@ export class ModuleService {
 
             sedCommands.push(`" ${pathResolve(configFilePath, 'msgconv_config_template.txt')} > ${pathResolve(configFilePath, 'msgconv_config.txt')}`);
 
-            this.logger.log(['ModuleService', 'info'], `Executing sed command: '${sedCommands.join('')}'`);
+            this.server.log(['ModuleService', 'info'], `Executing sed command: '${sedCommands.join('')}'`);
 
             await promisify(exec)(sedCommands.join(''));
             status = true;
         }
         catch (ex) {
-            this.logger.log(['ModuleService', 'error'], `Exception while updating msgconv_config.txt: ${ex.message}`);
+            this.server.log(['ModuleService', 'error'], `Exception while updating msgconv_config.txt: ${ex.message}`);
         }
 
         return status;
