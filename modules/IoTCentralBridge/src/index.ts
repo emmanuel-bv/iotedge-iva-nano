@@ -10,11 +10,27 @@ import { forget } from './utils';
 
 const composeOptions: ComposeOptions = {
     relativeTo: __dirname,
-    logger: (t, m) => {
-        const tags = ((t && Array.isArray(t)) ? `[opt,${t.join(',')}]` : '[opt]');
-
-        // tslint:disable-next-line:no-console
-        console.log(`[${new Date().toTimeString()}] ${tags} ${m}`);
+    logCompose: {
+        serializers: {
+            req: (req) => {
+                return `${(req.method || '').toUpperCase()} ${req.url?.origin} ${req.url?.pathname}`;
+            },
+            res: (res) => {
+                return `${res.statusCode} ${res.raw?.statusMessage}`;
+            },
+            tags: (tags) => {
+                return `[${tags}]`;
+            },
+            responseTime: (responseTime) => {
+                return `${responseTime}ms`;
+            }
+        },
+        prettyPrint: {
+            colorize: true,
+            messageFormat: '{tags} {data} {req} {res} {responseTime}',
+            translateTime: 'SYS:yyyy-mm-dd"T"HH:MM:sso',
+            ignore: 'pid,hostname,tags,data,req,res,responseTime'
+        }
     }
 };
 
