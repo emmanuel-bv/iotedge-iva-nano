@@ -88,8 +88,10 @@ export class ModuleService {
     }
 
     // @ts-ignore (testparam)
-    public async sample1(testparam: any): Promise<void> {
-        return;
+    public async sample1(testparam: any): Promise<any> {
+        return {
+            sample: 'result'
+        };
     }
 
     @bind
