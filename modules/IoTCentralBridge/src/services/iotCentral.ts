@@ -237,7 +237,7 @@ export class IoTCentralService {
                 });
             }
 
-            this.healthState = healthState
+            this.healthState = healthState;
         }
         catch (ex) {
             this.server.log(['IoTCentralService', 'error'], `Error calling systemProperties: ${ex.message}`);
@@ -427,6 +427,18 @@ export class IoTCentralService {
         };
     }
 
+    public async setPipelineState(pipelineState: PipelineState) {
+        const newPipelineState = pipelineState === PipelineState.Active ? true : false;
+
+        if (newPipelineState !== this.pipelineState) {
+            await this.sendMeasurement({
+                [ModuleInfoFieldIds.State.PipelineState]: pipelineState
+            });
+        }
+
+        this.pipelineState = newPipelineState;
+    }
+
     private async getModuleProperties(): Promise<any> {
         let result = {};
 
@@ -438,18 +450,6 @@ export class IoTCentralService {
         }
 
         return result;
-    }
-
-    public async setPipelineState(pipelineState: PipelineState) {
-        const newPipelineState = pipelineState === PipelineState.Active ? true : false;
-
-        if (newPipelineState !== this.pipelineState) {
-            await this.sendMeasurement({
-                [ModuleInfoFieldIds.State.PipelineState]: pipelineState
-            });
-        }
-
-        this.pipelineState = newPipelineState;
     }
 
     @bind
