@@ -372,6 +372,9 @@ export class IoTCentralService {
         try {
             const iotcMessage = new Message(JSON.stringify(data));
 
+            iotcMessage.contentEncoding = 'utf-8';
+            iotcMessage.contentType = 'application/json';
+
             await this.iotcClient.sendEvent(iotcMessage);
 
             if (_get(process.env, 'DEBUG_TELEMETRY') === '1') {
