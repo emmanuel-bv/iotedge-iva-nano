@@ -21,7 +21,7 @@ import {
     DeviceMethodResponse
 } from 'azure-iot-device';
 import { healthCheckInterval, HealthState } from './health';
-import { bind, defer, emptyObj } from '../utils';
+import { bind, defer, emptyObj, sleep } from '../utils';
 
 export interface ISystemProperties {
     cpuModel: string;
@@ -288,6 +288,12 @@ export class IoTCentralService {
             this.server.log(['IoTCentralService', 'info'], `IOTEDGE_MODULEGENERATIONID: ${this.config.get('IOTEDGE_MODULEGENERATIONID')}`);
             this.server.log(['IoTCentralService', 'info'], `IOTEDGE_IOTHUBHOSTNAME: ${this.config.get('IOTEDGE_IOTHUBHOSTNAME')}`);
             this.server.log(['IoTCentralService', 'info'], `IOTEDGE_AUTHSCHEME: ${this.config.get('IOTEDGE_AUTHSCHEME')}`);
+
+            // TODO:
+            // We need to hang out here for a bit of time to avoid a race condition where the edgeHub module is not
+            // yet completely initialized. In the Edge runtime release 1.0.10-rc1 there is a new "priority" property
+            // that can be used for modules that need to start up in a certain order.
+            await sleep(15 * 1000);
 
             // tslint:disable-next-line:prefer-conditional-expression
             if (_get(process.env, 'LOCAL_DEBUG') === '1') {
